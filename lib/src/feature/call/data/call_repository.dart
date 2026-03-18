@@ -117,8 +117,9 @@ final class CallRepositoryImpl implements ICallRepository {
 
   @override
   void dispose() {
-    _engine.unregisterEventHandler(RtcEngineEventHandler());
-    _engine.release();
+    _engine
+      ..unregisterEventHandler(const RtcEngineEventHandler())
+      ..release();
     _streamController.close();
   }
 }

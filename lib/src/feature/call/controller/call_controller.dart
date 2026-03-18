@@ -154,7 +154,7 @@ final class CallController extends StateController<CallState> with DroppableCont
       final permissions = <Permission>[Permission.microphone];
       if (callType == CallType.video) permissions.add(Permission.camera);
       await permissions.request();
-    } catch (_) {
+    } on Exception catch (_) {
       // Some platforms don't support explicit permission requests; ignore.
     }
   }
