@@ -119,20 +119,28 @@ class _AudioCallView extends StatelessWidget {
                 Text(
                   state.remoteUids.isEmpty
                       ? 'Waiting for others to join…'
-                      : '${state.remoteUids.length} '
-                            'participant${state.remoteUids.length == 1 ? '' : 's'} connected',
+                      : '${state.remoteUids.length + 1} '
+                            'participant${state.remoteUids.length + 1 == 1 ? '' : 's'} connected',
                   style: const TextStyle(color: Colors.white54),
                 ),
               ],
             ),
           ),
-          Positioned(top: 0, left: 0, right: 0, child: _TopBar(channelName: state.channelName)),
           Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: _ControlBar(state: state, controller: controller),
+          top: 0,
+          left: 0,
+          right: 0,
+          child: _TopBar(
+            channelName: state.channelName,
+            participantCount: state.remoteUids.length + 1,
           ),
+        ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: _ControlBar(state: state, controller: controller),
+        ),
         ],
       ),
     ),
@@ -142,9 +150,10 @@ class _AudioCallView extends StatelessWidget {
 // ── Shared sub-widgets ───────────────────────────────────────────────────────
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.channelName});
+  const _TopBar({required this.channelName, this.participantCount});
 
   final String channelName;
+  final int? participantCount;
 
   @override
   Widget build(BuildContext context) => SafeArea(
@@ -175,6 +184,27 @@ class _TopBar extends StatelessWidget {
               ],
             ),
           ),
+          if (participantCount != null) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.black45,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.people, size: 13, color: Colors.white70),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$participantCount',
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     ),
@@ -268,8 +298,55 @@ class _ControlButton extends StatelessWidget {
   );
 }
 
-class _RemoteVideoView extends StatelessWidget {
-  const _RemoteVideoView({required this.uid, required this.channelName, required this.engine});
+/// Renders all remote participants in a responsive grid.
+///
+/// - 1 participant → full screen
+/// - 2 participants → top/bottom halves
+/// - 3–4 participants → 2×2 grid
+/// - 5+ participants → scrollable grid
+class _RemoteVideoGrid extends StatelessWidget {
+  const _RemoteVideoGrid({
+    required this.remoteUids,
+    required this.channelName,
+    required this.engine,
+  });
+
+  final List<int> remoteUids;
+  final String channelName;
+  final RtcEngine engine;
+
+  @override
+  Widget build(BuildContext context) {
+    if (remoteUids.length == 1) {
+      return _SingleRemoteVideo(
+        uid: remoteUids.first,
+        channelName: channelName,
+        engine: engine,
+      );
+    }
+    final crossAxisCount = remoteUids.length <= 4 ? 2 : 3;
+    return GridView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        childAspectRatio: 3 / 4,
+      ),
+      itemCount: remoteUids.length,
+      itemBuilder: (context, index) => _SingleRemoteVideo(
+        uid: remoteUids[index],
+        channelName: channelName,
+        engine: engine,
+      ),
+    );
+  }
+}
+
+class _SingleRemoteVideo extends StatelessWidget {
+  const _SingleRemoteVideo({
+    required this.uid,
+    required this.channelName,
+    required this.engine,
+  });
 
   final int uid;
   final String channelName;
