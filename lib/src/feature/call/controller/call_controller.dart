@@ -4,6 +4,7 @@ import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:control/control.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_project/src/feature/call/data/call_repository.dart';
+import 'package:flutter_project/src/feature/call/data/token_repository.dart';
 import 'package:flutter_project/src/feature/call/models/call_event.dart';
 import 'package:flutter_project/src/feature/call/models/call_type.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -40,11 +41,14 @@ final class CallController extends StateController<CallState> with DroppableCont
   CallController({
     required ICallRepository callRepository,
     required String appId,
+    ITokenRepository tokenRepository = const TokenRepositoryNoop(),
     super.initialState = const CallState.idle(),
   }) : _callRepository = callRepository,
-       _appId = appId;
+       _appId = appId,
+       _tokenRepository = tokenRepository;
 
   final ICallRepository _callRepository;
+  final ITokenRepository _tokenRepository;
   final String _appId;
   StreamSubscription<CallEvent>? _eventsSubscription;
 
@@ -88,6 +92,11 @@ final class CallController extends StateController<CallState> with DroppableCont
   }
 
   /// Joins a channel with the given parameters.
+  ///
+  /// Token priority:
+  ///   1. [token] if explicitly provided (e.g. a temp token from config)
+  ///   2. A freshly generated token from [ITokenRepository] (when App Certificate is set)
+  ///   3. No token — works when the Agora project uses App ID-only auth
   void join({
     required String channelName,
     required CallType callType,
@@ -105,9 +114,15 @@ final class CallController extends StateController<CallState> with DroppableCont
     }
     await _requestPermissions(callType);
     setState(CallState.joining(channelName: channelName, callType: callType));
+
+    // Resolve effective token: explicit → generated → none
+    final effectiveToken = (token != null && token.isNotEmpty)
+        ? token
+        : _tokenRepository.generateToken(channelName: channelName, uid: uid);
+
     await _callRepository.joinChannel(
       channelName: channelName,
-      token: token?.isNotEmpty == true ? token : null,
+      token: effectiveToken,
       uid: uid,
       callType: callType,
     );

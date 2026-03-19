@@ -10,11 +10,11 @@ Be concise and efficient in every response. Do not repeat information the user a
 
 ---
 
-# Flutter POS System Architecture Analysis
+# Flutter Architecture Analysis
 
 ## Overview
 
-This document analyzes the clean architecture implementation in the AveraPOS cloud Flutter application, focusing on the example feature as an example. The application follows a well-structured clean architecture pattern with clear separation of concerns.
+This document analyzes the clean architecture implementation in the AgoraWebRTC Flutter application, focusing on the example feature as an example. The application follows a well-structured clean architecture pattern with clear separation of concerns.
 
 ## Clean Architecture Layers
 
@@ -740,7 +740,7 @@ QuickReplyDeletionConfigWidget.showDeletionDialog(context, reply);
 
 ## Conclusion
 
-The AveraPOS Flutter application demonstrates a well-implemented clean architecture with:
+The AgoraWebRTC Flutter application demonstrates a well-implemented clean architecture with:
 
 - Clear separation of concerns across data, domain, and presentation layers
 - Comprehensive dependency injection using both global and feature-level approaches

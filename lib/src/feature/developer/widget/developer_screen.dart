@@ -42,11 +42,6 @@ class DeveloperScreen extends StatelessWidget {
         // // --- Application information --- //
         // _GroupSeparator(title: Localization.of(context).application),
         const _OpenUriTile(
-          title: 'Team leader',
-          description: 'dilovar88',
-          uri: 'https://github.com/dilovar88',
-        ),
-        const _OpenUriTile(
           title: 'Developer/Maintainer',
           description: 'sb-dor',
           uri: 'https://github.com/sb-dor',
@@ -83,20 +78,15 @@ class DeveloperScreen extends StatelessWidget {
         const _OpenUriTile(
           title: 'Repository',
           description: 'Project repository',
-          uri: 'https://github.com/dilovar88/avera-web-flutter',
+          uri: 'https://github.com/sb-dor/agorawebrtc',
         ),
         const _OpenUriTile(
           title: 'Pull requests',
           description: 'Pull requests list',
-          uri: 'https://github.com/dilovar88/avera-web-flutter/pulls',
+          uri: 'https://github.com/sb-dor/agorawebrtc/pulls',
         ),
         // const _OpenUriTile(title: 'Jenkins', description: 'CI/CD pipeline'),
         // const _OpenUriTile(title: 'Figma', description: 'Designs system'),
-        const _OpenUriTile(
-          title: 'Firebase',
-          description: 'Firebase console',
-          uri: 'https://console.firebase.google.com/project/avera-web/overview',
-        ),
         const _OpenUriTile(title: 'Sentry', description: 'Sentry console'),
 
         /* SliverPadding(

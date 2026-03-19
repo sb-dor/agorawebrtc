@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/src/common/constant/config.dart';
 import 'package:flutter_project/src/feature/call/controller/call_controller.dart';
 import 'package:flutter_project/src/feature/call/data/call_repository.dart';
+import 'package:flutter_project/src/feature/call/data/token_repository.dart';
 import 'package:flutter_project/src/feature/call/widgets/active_call/call_active_widget.dart';
 import 'package:flutter_project/src/feature/call/widgets/controllers/call_data_controller.dart';
 import 'package:flutter_project/src/feature/call/widgets/lobby/call_lobby_widget.dart';
@@ -39,7 +40,16 @@ class CallConfigWidgetState extends State<CallConfigWidget> {
   @override
   void initState() {
     super.initState();
-    callController = CallController(callRepository: CallRepositoryImpl(), appId: Config.agoraAppId);
+    callController = CallController(
+      callRepository: CallRepositoryImpl(),
+      appId: Config.agoraAppId,
+      tokenRepository: Config.agoraAppCertificate.isEmpty
+          ? const TokenRepositoryNoop()
+          : TokenRepositoryImpl(
+              appId: Config.agoraAppId,
+              appCertificate: Config.agoraAppCertificate,
+            ),
+    );
     callDataController = CallDataController();
     callController.initialize();
   }

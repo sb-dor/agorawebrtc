@@ -6,5 +6,6 @@
   "ALPHA": false,
   "BETA": false,
   "AGORA_APP_ID": "",
-  "AGORA_TEMP_TOKEN": ""
+  "AGORA_TEMP_TOKEN": "",
+  "AGORA_APP_CERTIFICATE": ""
 }
