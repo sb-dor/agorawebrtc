@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_project/src/common/util/app_zone.dart';
 import 'package:flutter_project/src/common/util/error_util/error_util.dart';
-import 'package:flutter_project/src/feature/initialization/widget/app.dart';
 import 'package:flutter_project/src/common/widget/app_error.dart' deferred as app_error;
 import 'package:flutter_project/src/feature/initialization/data/initialization.dart'
     deferred as initialization;
+import 'package:flutter_project/src/feature/initialization/widget/app.dart';
 import 'package:flutter_project/src/feature/settings/widget/settings_scope.dart';
 import 'package:octopus/octopus.dart';
 import 'package:platform_info/platform_info.dart';

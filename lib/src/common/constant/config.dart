@@ -77,8 +77,10 @@ abstract final class Config {
 
   /// Agora App Certificate from https://console.agora.io
   /// Required for client-side token generation. Keep empty to disable.
-  static const String agoraAppCertificate =
-      String.fromEnvironment('AGORA_APP_CERTIFICATE', defaultValue: '');
+  static const String agoraAppCertificate = String.fromEnvironment(
+    'AGORA_APP_CERTIFICATE',
+    defaultValue: '',
+  );
 
   // --- LAYOUT --- //
 

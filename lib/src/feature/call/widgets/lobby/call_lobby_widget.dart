@@ -13,8 +13,7 @@ import 'package:flutter_project/src/feature/call/widgets/call_config_widget.dart
 String _generateMeetingCode() {
   const chars = 'abcdefghijklmnopqrstuvwxyz';
   final rng = math.Random();
-  String part(int len) =>
-      List.generate(len, (_) => chars[rng.nextInt(chars.length)]).join();
+  String part(int len) => List.generate(len, (_) => chars[rng.nextInt(chars.length)]).join();
   return '${part(3)}-${part(4)}-${part(3)}';
 }
 
@@ -38,8 +37,7 @@ class _CallLobbyWidgetState extends State<CallLobbyWidget> {
   @override
   void initState() {
     super.initState();
-    _channelController =
-        TextEditingController(text: _callDataController.lastChannelName);
+    _channelController = TextEditingController(text: _callDataController.lastChannelName);
   }
 
   @override
@@ -104,14 +102,12 @@ class _CallLobbyWidgetState extends State<CallLobbyWidget> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(Icons.video_call_rounded,
-                      size: 64, color: Colors.teal),
+                  const Icon(Icons.video_call_rounded, size: 64, color: Colors.teal),
                   const SizedBox(height: 12),
                   Text(
                     'Agora Call',
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 32),
 
@@ -134,8 +130,7 @@ class _CallLobbyWidgetState extends State<CallLobbyWidget> {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Text(
                           'or join with a code',
-                          style: theme.textTheme.bodySmall
-                              ?.copyWith(color: Colors.white38),
+                          style: theme.textTheme.bodySmall?.copyWith(color: Colors.white38),
                         ),
                       ),
                       const Expanded(child: Divider()),
@@ -167,15 +162,11 @@ class _CallLobbyWidgetState extends State<CallLobbyWidget> {
                   ),
 
                   // ── Generated-code share hint ───────────────────────────
-                  if (_isGenerated) ...[
-                    const SizedBox(height: 10),
-                    _ShareHint(onCopy: _copyCode),
-                  ],
+                  if (_isGenerated) ...[const SizedBox(height: 10), _ShareHint(onCopy: _copyCode)],
 
                   if (state is Call$ErrorState) ...[
                     const SizedBox(height: 12),
-                    _ErrorCard(
-                        message: state.message, onRetry: _callController.retryInit),
+                    _ErrorCard(message: state.message, onRetry: _callController.retryInit),
                   ],
 
                   const SizedBox(height: 24),
@@ -184,20 +175,16 @@ class _CallLobbyWidgetState extends State<CallLobbyWidget> {
                   AnimatedBuilder(
                     animation: _channelController,
                     builder: (context, _) {
-                      final hasChannel =
-                          _channelController.text.trim().isNotEmpty;
+                      final hasChannel = _channelController.text.trim().isNotEmpty;
                       return Row(
                         children: [
                           Expanded(
                             child: OutlinedButton.icon(
-                              onPressed: hasChannel
-                                  ? () => _startCall(CallType.audio)
-                                  : null,
+                              onPressed: hasChannel ? () => _startCall(CallType.audio) : null,
                               icon: const Icon(Icons.call),
                               label: const Text('Audio'),
                               style: OutlinedButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
                                 side: const BorderSide(color: Colors.teal),
                                 foregroundColor: Colors.teal,
                               ),
@@ -206,15 +193,12 @@ class _CallLobbyWidgetState extends State<CallLobbyWidget> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: FilledButton.icon(
-                              onPressed: hasChannel
-                                  ? () => _startCall(CallType.video)
-                                  : null,
+                              onPressed: hasChannel ? () => _startCall(CallType.video) : null,
                               icon: const Icon(Icons.videocam),
                               label: const Text('Video'),
                               style: FilledButton.styleFrom(
                                 backgroundColor: Colors.teal,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
                               ),
                             ),
                           ),
@@ -246,36 +230,35 @@ class _ShareHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.teal.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    decoration: BoxDecoration(
+      color: Colors.teal.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
+    ),
+    child: Row(
+      children: [
+        const Icon(Icons.share, size: 16, color: Colors.teal),
+        const SizedBox(width: 8),
+        const Expanded(
+          child: Text(
+            'Share this code with people you want in the meeting.',
+            style: TextStyle(color: Colors.teal, fontSize: 12),
+          ),
         ),
-        child: Row(
-          children: [
-            const Icon(Icons.share, size: 16, color: Colors.teal),
-            const SizedBox(width: 8),
-            const Expanded(
-              child: Text(
-                'Share this code with people you want in the meeting.',
-                style: TextStyle(color: Colors.teal, fontSize: 12),
-              ),
-            ),
-            TextButton(
-              onPressed: onCopy,
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.teal,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const Text('Copy', style: TextStyle(fontSize: 12)),
-            ),
-          ],
+        TextButton(
+          onPressed: onCopy,
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.teal,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: const Text('Copy', style: TextStyle(fontSize: 12)),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _ErrorCard extends StatelessWidget {
@@ -286,23 +269,21 @@ class _ErrorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        color: Colors.red.shade900.withValues(alpha: 0.4),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              const Icon(Icons.error_outline, color: Colors.redAccent),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(message,
-                    style: const TextStyle(color: Colors.redAccent)),
-              ),
-              TextButton(
-                  onPressed: onRetry, child: const Text('Retry')),
-            ],
+    color: Colors.red.shade900.withValues(alpha: 0.4),
+    child: Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: Colors.redAccent),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(message, style: const TextStyle(color: Colors.redAccent)),
           ),
-        ),
-      );
+          TextButton(onPressed: onRetry, child: const Text('Retry')),
+        ],
+      ),
+    ),
+  );
 }
 
 class _ConfigWarning extends StatelessWidget {
@@ -310,22 +291,22 @@ class _ConfigWarning extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        color: Colors.orange.shade900.withValues(alpha: 0.4),
-        child: const Padding(
-          padding: EdgeInsets.all(12),
-          child: Row(
-            children: [
-              Icon(Icons.warning_amber_rounded, color: Colors.orange),
-              SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Agora App ID not configured. '
-                  'Set AGORA_APP_ID in your config file.',
-                  style: TextStyle(color: Colors.orange),
-                ),
-              ),
-            ],
+    color: Colors.orange.shade900.withValues(alpha: 0.4),
+    child: const Padding(
+      padding: EdgeInsets.all(12),
+      child: Row(
+        children: [
+          Icon(Icons.warning_amber_rounded, color: Colors.orange),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Agora App ID not configured. '
+              'Set AGORA_APP_ID in your config file.',
+              style: TextStyle(color: Colors.orange),
+            ),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }

@@ -20,16 +20,15 @@ class _CallActiveWidgetState extends State<CallActiveWidget> {
   late final _controller = _scope.callController;
 
   @override
-  Widget build(BuildContext context) =>
-      StateConsumer<CallController, CallState>(
-        controller: _controller,
-        builder: (context, state, _) {
-          if (state is! Call$ConnectedState) return const SizedBox.shrink();
-          return state.callType == CallType.video
-              ? _VideoCallView(state: state, controller: _controller)
-              : _AudioCallView(state: state, controller: _controller);
-        },
-      );
+  Widget build(BuildContext context) => StateConsumer<CallController, CallState>(
+    controller: _controller,
+    builder: (context, state, _) {
+      if (state is! Call$ConnectedState) return const SizedBox.shrink();
+      return state.callType == CallType.video
+          ? _VideoCallView(state: state, controller: _controller)
+          : _AudioCallView(state: state, controller: _controller);
+    },
+  );
 }
 
 // ── Video call ──────────────────────────────────────────────────────────────
@@ -52,10 +51,7 @@ class _VideoCallView extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              _TopBar(
-                channelName: state.channelName,
-                participantCount: remoteCount + 1,
-              ),
+              _TopBar(channelName: state.channelName, participantCount: remoteCount + 1),
               Expanded(
                 child: _ParticipantGrid(
                   remoteUids: state.remoteUids,
@@ -64,11 +60,7 @@ class _VideoCallView extends StatelessWidget {
                   isCameraOff: state.isCameraOff,
                 ),
               ),
-              _ControlBar(
-                state: state,
-                controller: controller,
-                overlay: false,
-              ),
+              _ControlBar(state: state, controller: controller, overlay: false),
             ],
           ),
         ),
@@ -97,10 +89,7 @@ class _VideoCallView extends StatelessWidget {
             top: 0,
             left: 0,
             right: 0,
-            child: _TopBar(
-              channelName: state.channelName,
-              participantCount: remoteCount + 1,
-            ),
+            child: _TopBar(channelName: state.channelName, participantCount: remoteCount + 1),
           ),
 
           // Local preview (bottom-right corner)
@@ -155,8 +144,7 @@ class _ParticipantGrid extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final cellW =
-            (constraints.maxWidth - (crossAxisCount - 1) * 2) / crossAxisCount;
+        final cellW = (constraints.maxWidth - (crossAxisCount - 1) * 2) / crossAxisCount;
         final cellH = (constraints.maxHeight - (rows - 1) * 2) / rows;
         final aspectRatio = cellW / math.max(cellH, 1);
 
@@ -214,10 +202,7 @@ class _ParticipantTile extends StatelessWidget {
           _CameraOffTile(label: isLocal ? 'You' : 'U${uid % 1000}')
         else if (isLocal)
           AgoraVideoView(
-            controller: VideoViewController(
-              rtcEngine: engine,
-              canvas: const VideoCanvas(uid: 0),
-            ),
+            controller: VideoViewController(rtcEngine: engine, canvas: const VideoCanvas(uid: 0)),
           )
         else
           AgoraVideoView(
@@ -256,32 +241,25 @@ class _CameraOffTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        color: const Color(0xFF1C2333),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 26,
-              backgroundColor: Colors.teal.shade700,
-              child: Text(
-                label.isNotEmpty ? label[0].toUpperCase() : '?',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
-            ),
-            const SizedBox(height: 4),
-            const Icon(Icons.videocam_off, size: 14, color: Colors.white38),
-          ],
+    color: const Color(0xFF1C2333),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        CircleAvatar(
+          radius: 26,
+          backgroundColor: Colors.teal.shade700,
+          child: Text(
+            label.isNotEmpty ? label[0].toUpperCase() : '?',
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+          ),
         ),
-      );
+        const SizedBox(height: 8),
+        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+        const SizedBox(height: 4),
+        const Icon(Icons.videocam_off, size: 14, color: Colors.white38),
+      ],
+    ),
+  );
 }
 
 /// Placeholder shown for unfilled grid slots (e.g. 3 people in a 2×2 grid).
@@ -290,21 +268,18 @@ class _EmptySlotTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        color: const Color(0xFF111827),
-        child: const Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.person_add_outlined, size: 28, color: Colors.white12),
-              SizedBox(height: 6),
-              Text(
-                'Empty',
-                style: TextStyle(color: Colors.white12, fontSize: 10),
-              ),
-            ],
-          ),
-        ),
-      );
+    color: const Color(0xFF111827),
+    child: const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.person_add_outlined, size: 28, color: Colors.white12),
+          SizedBox(height: 6),
+          Text('Empty', style: TextStyle(color: Colors.white12, fontSize: 10)),
+        ],
+      ),
+    ),
+  );
 }
 
 // ── Audio call ──────────────────────────────────────────────────────────────
@@ -317,54 +292,54 @@ class _AudioCallView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: const Color(0xFF0F1520),
-        body: SafeArea(
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _ParticipantAvatars(remoteUids: state.remoteUids),
-                    const SizedBox(height: 24),
-                    Text(
-                      state.channelName,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      state.remoteUids.isEmpty
-                          ? 'Waiting for others to join…'
-                          : '${state.remoteUids.length + 1} participants connected',
-                      style: const TextStyle(color: Colors.white54),
-                    ),
-                  ],
+    backgroundColor: const Color(0xFF0F1520),
+    body: SafeArea(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _ParticipantAvatars(remoteUids: state.remoteUids),
+                const SizedBox(height: 24),
+                Text(
+                  state.channelName,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: _TopBar(
-                  channelName: state.channelName,
-                  participantCount: state.remoteUids.length + 1,
+                const SizedBox(height: 8),
+                Text(
+                  state.remoteUids.isEmpty
+                      ? 'Waiting for others to join…'
+                      : '${state.remoteUids.length + 1} participants connected',
+                  style: const TextStyle(color: Colors.white54),
                 ),
-              ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: _ControlBar(state: state, controller: controller),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _TopBar(
+              channelName: state.channelName,
+              participantCount: state.remoteUids.length + 1,
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: _ControlBar(state: state, controller: controller),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 // ── Shared sub-widgets ───────────────────────────────────────────────────────
@@ -377,76 +352,62 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SafeArea(
-        bottom: false,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withValues(alpha: 0.7),
-                Colors.transparent,
+    bottom: false,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.black.withValues(alpha: 0.7), Colors.transparent],
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.black45,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.lock, size: 13, color: Colors.greenAccent),
+                const SizedBox(width: 6),
+                Text(channelName, style: const TextStyle(color: Colors.white, fontSize: 14)),
               ],
             ),
           ),
-          child: Row(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.black45,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.lock, size: 13, color: Colors.greenAccent),
-                    const SizedBox(width: 6),
-                    Text(
-                      channelName,
-                      style:
-                          const TextStyle(color: Colors.white, fontSize: 14),
-                    ),
-                  ],
-                ),
+          if (participantCount != null) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.black45,
+                borderRadius: BorderRadius.circular(20),
               ),
-              if (participantCount != null) ...[
-                const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.black45,
-                    borderRadius: BorderRadius.circular(20),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.people, size: 13, color: Colors.white70),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$participantCount',
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.people, size: 13, color: Colors.white70),
-                      const SizedBox(width: 4),
-                      Text(
-                        '$participantCount',
-                        style: const TextStyle(
-                            color: Colors.white70, fontSize: 13),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      );
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
 }
 
 class _ControlBar extends StatelessWidget {
-  const _ControlBar({
-    required this.state,
-    required this.controller,
-    this.overlay = true,
-  });
+  const _ControlBar({required this.state, required this.controller, this.overlay = true});
 
   final Call$ConnectedState state;
   final CallController controller;
@@ -457,51 +418,48 @@ class _ControlBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-        decoration: BoxDecoration(
-          color: overlay ? null : const Color(0xFF0A0A0F),
-          gradient: overlay
-              ? LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    Colors.black.withValues(alpha: 0.9),
-                    Colors.transparent,
-                  ],
-                )
-              : null,
+    padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+    decoration: BoxDecoration(
+      color: overlay ? null : const Color(0xFF0A0A0F),
+      gradient: overlay
+          ? LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: [Colors.black.withValues(alpha: 0.9), Colors.transparent],
+            )
+          : null,
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _ControlButton(
+          icon: state.isMuted ? Icons.mic_off : Icons.mic,
+          label: state.isMuted ? 'Unmute' : 'Mute',
+          active: state.isMuted,
+          onTap: controller.toggleMute,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _ControlButton(
-              icon: state.isMuted ? Icons.mic_off : Icons.mic,
-              label: state.isMuted ? 'Unmute' : 'Mute',
-              active: state.isMuted,
-              onTap: controller.toggleMute,
-            ),
-            if (state.callType == CallType.video) ...[
-              _ControlButton(
-                icon: state.isCameraOff ? Icons.videocam_off : Icons.videocam,
-                label: state.isCameraOff ? 'Start Cam' : 'Stop Cam',
-                active: state.isCameraOff,
-                onTap: controller.toggleCamera,
-              ),
-              _ControlButton(
-                icon: Icons.flip_camera_ios,
-                label: 'Flip',
-                onTap: controller.switchCamera,
-              ),
-            ],
-            _ControlButton(
-              icon: Icons.call_end,
-              label: 'End',
-              onTap: controller.leave,
-              backgroundColor: Colors.redAccent,
-            ),
-          ],
+        if (state.callType == CallType.video) ...[
+          _ControlButton(
+            icon: state.isCameraOff ? Icons.videocam_off : Icons.videocam,
+            label: state.isCameraOff ? 'Start Cam' : 'Stop Cam',
+            active: state.isCameraOff,
+            onTap: controller.toggleCamera,
+          ),
+          _ControlButton(
+            icon: Icons.flip_camera_ios,
+            label: 'Flip',
+            onTap: controller.switchCamera,
+          ),
+        ],
+        _ControlButton(
+          icon: Icons.call_end,
+          label: 'End',
+          onTap: controller.leave,
+          backgroundColor: Colors.redAccent,
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _ControlButton extends StatelessWidget {
@@ -521,30 +479,25 @@ class _ControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: backgroundColor ??
-                    (active
-                        ? Colors.orange.withValues(alpha: 0.8)
-                        : Colors.white24),
-              ),
-              child: Icon(icon, color: Colors.white, size: 24),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
-            ),
-          ],
+    onTap: onTap,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color:
+                backgroundColor ?? (active ? Colors.orange.withValues(alpha: 0.8) : Colors.white24),
+          ),
+          child: Icon(icon, color: Colors.white, size: 24),
         ),
-      );
+        const SizedBox(height: 6),
+        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+      ],
+    ),
+  );
 }
 
 class _LocalVideoPreview extends StatelessWidget {
@@ -554,14 +507,11 @@ class _LocalVideoPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: AgoraVideoView(
-          controller: VideoViewController(
-            rtcEngine: engine,
-            canvas: const VideoCanvas(uid: 0),
-          ),
-        ),
-      );
+    borderRadius: BorderRadius.circular(12),
+    child: AgoraVideoView(
+      controller: VideoViewController(rtcEngine: engine, canvas: const VideoCanvas(uid: 0)),
+    ),
+  );
 }
 
 class _WaitingView extends StatelessWidget {
@@ -569,18 +519,15 @@ class _WaitingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.person_search, size: 72, color: Colors.white24),
-            SizedBox(height: 16),
-            Text(
-              'Waiting for others to join…',
-              style: TextStyle(color: Colors.white54, fontSize: 16),
-            ),
-          ],
-        ),
-      );
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.person_search, size: 72, color: Colors.white24),
+        SizedBox(height: 16),
+        Text('Waiting for others to join…', style: TextStyle(color: Colors.white54, fontSize: 16)),
+      ],
+    ),
+  );
 }
 
 class _ParticipantAvatars extends StatelessWidget {

@@ -117,34 +117,52 @@ The lobby works exactly like Google Meet:
 
 ## 7. Token authentication
 
-Agora supports two authentication modes. The app handles both automatically — no code changes needed, only config.
+### How it works in this app
 
-### Token priority (resolved automatically at join time)
+The app uses the [`agora_token_generator`](https://pub.dev/packages/agora_token_generator)
+package to generate Agora RTC tokens **directly on the device** — no backend server required.
 
-| Priority | Source | When used |
-|---|---|---|
-| 1 | `AGORA_TEMP_TOKEN` in config | Quick testing without a certificate |
-| 2 | Client-side generated (App Certificate) | `AGORA_APP_CERTIFICATE` is set |
-| 3 | No token | App ID-only project (Agora default for new projects) |
+#### Files involved
+
+| File | Role |
+|---|---|
+| `lib/src/feature/call/data/token_repository.dart` | `ITokenRepository` interface + `TokenRepositoryImpl` (generates tokens) + `TokenRepositoryNoop` (returns null when no certificate) |
+| `lib/src/feature/call/widgets/call_config_widget.dart` | Creates the right repository at startup based on whether `AGORA_APP_CERTIFICATE` is set |
+| `lib/src/feature/call/controller/call_controller.dart` | Resolves the final token inside `join()` before connecting |
+| `lib/src/common/constant/config.dart` | Exposes `Config.agoraAppCertificate` from the config JSON |
+| `config/development.json` / `config/production.json` | Where you put the certificate value |
+
+#### Token resolution — automatic, no code changes needed
+
+Every time someone taps **Audio** or **Video**, `CallController.join()` picks the token using this priority:
+
+```
+1. AGORA_TEMP_TOKEN (config)      ← set → use it as-is (quick testing)
+         ↓ empty
+2. TokenRepositoryImpl.generateToken()  ← AGORA_APP_CERTIFICATE set → generate fresh token
+         ↓ no certificate
+3. null                            ← App ID-only mode (Agora default for new projects)
+```
+
+The generated token is scoped to the specific channel name and user ID, and is valid for **1 hour**.
 
 ---
 
-### Option A — Client-side token generation (simple, no server needed)
+### Setup — enable client-side token generation
 
-The app uses the [`agora_token_generator`](https://pub.dev/packages/agora_token_generator)
-package to generate tokens directly on the device.
+#### Step 1 — Enable App Certificate in Agora Console
 
-> ⚠️ **Security trade-off:** the App Certificate is bundled in the app binary.
-> Anyone who decompiles the app can extract it. Use this only for internal tools,
-> demos, or apps where that risk is acceptable. For a public app use Option B.
-
-#### Steps
-
-1. Open your project in the [Agora Console](https://console.agora.io).
+1. Log in to the [Agora Console](https://console.agora.io).
 2. Go to **Project Management → your project → Edit**.
 3. Under **Security**, click **Enable** next to **App Certificate**.
-4. Copy the **Primary Certificate** value.
-5. Paste it into your config file:
+4. Copy the **Primary Certificate** string.
+
+> ⚠️ Once you enable the App Certificate for a project, **App ID-only** joins stop working.
+> Every client must supply a valid token from that point on.
+
+#### Step 2 — Add the certificate to your config file
+
+Open `config/production.json` (or `development.json`) and fill in:
 
 ```json
 {
@@ -154,19 +172,34 @@ package to generate tokens directly on the device.
 }
 ```
 
-6. Run the app — tokens are generated automatically every time someone joins a channel.
-   Each token is valid for **1 hour**.
+Leave `AGORA_TEMP_TOKEN` empty — the app will generate a fresh token automatically on every join.
 
-> ⚠️ Once you enable the App Certificate in the console, **App ID-only** joins stop
-> working for that project. Every client must supply a valid token.
+#### Step 3 — Run the app
+
+```bash
+flutter run --dart-define-from-file=config/production.json
+```
+
+That's it. No server, no extra code. Every call join automatically gets a valid signed token.
 
 ---
 
-### Option B — Server-side token generation (production-safe)
+### Security trade-off
 
-Generate tokens on a backend so the App Certificate never leaves your server.
+> ⚠️ Embedding the App Certificate in the app binary means anyone who decompiles
+> the app can extract it and generate their own tokens for your Agora project.
+>
+> This is acceptable for **internal tools, demos, and personal projects**.
+> For a **public production app** you should generate tokens on a server instead
+> (see Option B below) so the certificate never leaves your backend.
 
-#### 1. Enable App Certificate (same as Option A steps 1–4)
+---
+
+### Option B — Server-side token generation (public production apps)
+
+If you need to keep the App Certificate secret, generate tokens on a backend.
+
+#### 1. Enable App Certificate (same as Step 1 above)
 
 #### 2. Deploy a token server
 
@@ -200,9 +233,9 @@ GET /rtc/:channelName/:uid/publisher/uid/:tokenExpiry/
 }
 ```
 
-#### 4. Fetch the token before joining
+#### 4. Fetch the token in `_startCall()` before joining
 
-Update `_startCall()` in `call_lobby_widget.dart`:
+In `lib/src/feature/call/widgets/lobby/call_lobby_widget.dart`, update `_startCall()`:
 
 ```dart
 void _startCall(CallType callType) async {
@@ -221,7 +254,7 @@ void _startCall(CallType callType) async {
     channelName: channelName,
     callType: callType,
     uid: user.id,
-    token: token,
+    token: token, // controller will use this directly (priority 1)
   );
 }
 ```

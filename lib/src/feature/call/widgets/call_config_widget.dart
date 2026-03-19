@@ -45,7 +45,7 @@ class CallConfigWidgetState extends State<CallConfigWidget> {
       appId: Config.agoraAppId,
       tokenRepository: Config.agoraAppCertificate.isEmpty
           ? const TokenRepositoryNoop()
-          : TokenRepositoryImpl(
+          : const TokenRepositoryImpl(
               appId: Config.agoraAppId,
               appCertificate: Config.agoraAppCertificate,
             ),

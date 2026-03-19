@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:control/control.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_project/src/common/constant/config.dart';
 import 'package:flutter_project/src/common/constant/pubspec.yaml.g.dart';
 import 'package:flutter_project/src/common/controller/controller_observer.dart';
@@ -21,7 +22,6 @@ import 'package:l/l.dart';
 import 'package:platform_info/platform_info.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart';
 
 /// Initializes the app and returns a [Dependencies] object
 Future<Dependencies> $initializeDependencies({

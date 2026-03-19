@@ -9,29 +9,18 @@ import 'package:agora_token_generator/agora_token_generator.dart';
 abstract interface class ITokenRepository {
   /// Returns a fresh RTC token valid for [expireSeconds] seconds, or `null`
   /// if token generation is not configured (no App Certificate).
-  String? generateToken({
-    required String channelName,
-    required int uid,
-    int expireSeconds = 3600,
-  });
+  String? generateToken({required String channelName, required int uid, int expireSeconds = 3600});
 }
 
 /// Implementation that generates tokens client-side via [RtcTokenBuilder].
 class TokenRepositoryImpl implements ITokenRepository {
-  const TokenRepositoryImpl({
-    required this.appId,
-    required this.appCertificate,
-  });
+  const TokenRepositoryImpl({required this.appId, required this.appCertificate});
 
   final String appId;
   final String appCertificate;
 
   @override
-  String? generateToken({
-    required String channelName,
-    required int uid,
-    int expireSeconds = 3600,
-  }) {
+  String? generateToken({required String channelName, required int uid, int expireSeconds = 3600}) {
     if (appId.isEmpty || appCertificate.isEmpty) return null;
 
     return RtcTokenBuilder.buildTokenWithUid(
@@ -53,6 +42,5 @@ class TokenRepositoryNoop implements ITokenRepository {
     required String channelName,
     required int uid,
     int expireSeconds = 3600,
-  }) =>
-      null;
+  }) => null;
 }
