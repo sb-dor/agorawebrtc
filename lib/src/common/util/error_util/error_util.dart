@@ -3,7 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter_project/src/common/util/error_util/platform/error_util_vm.dart'
-    if (dart.library.html) 'package:flutter_project/src/common/util/platform/error_util_js.dart';
+    if (dart.library.html) 'package:flutter_project/src/common/util/error_util/platform/error_util_js.dart';
 import 'package:l/l.dart';
 
 /// Error util.
