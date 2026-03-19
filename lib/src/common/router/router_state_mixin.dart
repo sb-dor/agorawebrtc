@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart' show State, StatefulWidget, ValueNotifier;
 import 'package:flutter_project/src/common/router/authentication_guard.dart';
-import 'package:flutter_project/src/common/router/home_guard.dart';
 import 'package:flutter_project/src/common/router/routes.dart';
 import 'package:flutter_project/src/feature/initialization/models/dependencies.dart';
 import 'package:octopus/octopus.dart';
@@ -27,7 +26,7 @@ mixin RouterStateMixin<T extends StatefulWidget> on State<T> {
           // Get current user from authentication controller.
           getUser: () async => dependencies.authenticationController.state.user,
           // Available routes for non authenticated user.
-          routes: <String>{Routes.signin.name, Routes.signup.name},
+          routes: <String>{Routes.signin.name},
           // Default route for non authenticated user.
           signInNavigation: OctopusState.single(Routes.signin.node()),
           // Default route for authenticated user.
