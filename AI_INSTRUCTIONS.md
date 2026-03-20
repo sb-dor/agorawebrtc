@@ -652,9 +652,9 @@ Split when two things have **genuinely independent UI state machines** or **no l
 The quick replies functionality is split into three features because each has a distinct concern:
 
 ```
-quick_replies/          → "Provide the reactive list of quick replies to the UI"
-quick_reply_creation/   → "Manage the create/edit form lifecycle (inProgress, completed, error)"
-quick_reply_deletion/   → "Manage the delete confirmation lifecycle (inProgress, completed, error)"
+example_list/          → "Provide the reactive list of quick replies to the UI"
+example_creation/   → "Manage the create/edit form lifecycle (inProgress, completed, error)"
+example_deletion/   → "Manage the delete confirmation lifecycle (inProgress, completed, error)"
 ```
 
 The creation form and the deletion dialog each need their own `inProgress` / `completed` / `error` state independently. If they shared one controller, a deletion in progress could overwrite the creation form's state — causing wrong UI feedback and broken `PopScope` behaviour. The list (watching a stream) has no state overlap with either mutation. These are separate concerns, so they are separate features.
@@ -675,15 +675,15 @@ feature_name/
 **Controller** uses `DroppableControllerHandler` for mutations so duplicate taps are dropped:
 
 ```dart
-class QuickReplyCreationController extends StateController<QuickReplyCreationState>
+class ExampleCreationController extends StateController<ExampleCreationState>
     with DroppableControllerHandler {
 
-  void save({required String title, required String content, int? workerId, QuickReply? existing}) =>
+  void save({required String title, required String content, int? workerId, Example? existing}) =>
       handle(() async {
-        setState(const QuickReplyCreationState.inProgress());
+        setState(const ExampleCreationState.inProgress());
         final result = await _repo.save(title: title, content: content, existing: existing);
-        setState(QuickReplyCreationState.completed(result));
-      }, error: (e, st) async => setState(const QuickReplyCreationState.error()));
+        setState(ExampleCreationState.completed(result));
+      }, error: (e, st) async => setState(const ExampleCreationState.error()));
 }
 ```
 
@@ -692,12 +692,12 @@ Use `SequentialControllerHandler` for load/watch operations.
 **Config widget** owns the controller lifecycle and exposes a static factory so callers need only one line:
 
 ```dart
-class QuickReplyCreationConfigWidget extends StatefulWidget {
-  static Future<void> showCreationDialog(BuildContext context, {QuickReply? existing}) {
+class ExampleCreationConfigWidget extends StatefulWidget {
+  static Future<void> showCreationDialog(BuildContext context, {Example? existing}) {
     return showDialog<void>(
       context: context,
-      builder: (ctx) => QuickReplyCreationConfigWidget(
-        builder: (_) => QuickReplyCreationDialogWidget(existing: existing),
+      builder: (ctx) => ExampleCreationConfigWidget(
+        builder: (_) => ExampleCreationDialogWidget(existing: existing),
       ),
     );
   }
@@ -708,13 +708,13 @@ class QuickReplyCreationConfigWidget extends StatefulWidget {
 **Dialog widget** uses `StateConsumer` to close itself on completion and `PopScope` to block dismissal mid-flight:
 
 ```dart
-StateConsumer<QuickReplyCreationController, QuickReplyCreationState>(
+StateConsumer<ExampleCreationController, ExampleCreationState>(
   controller: _controller,
   listener: (context, controller, oldState, newState) {
-    if (newState is QuickReplyCreation$CompletedState) Navigator.pop(context);
+    if (newState is ExampleCreation$CompletedState) Navigator.pop(context);
   },
   builder: (context, state, child) => PopScope(
-    canPop: state is! QuickReplyCreation$InProgressState,
+    canPop: state is! ExampleCreation$InProgressState,
     child: AlertDialog(...),
   ),
 );
@@ -723,9 +723,9 @@ StateConsumer<QuickReplyCreationController, QuickReplyCreationState>(
 **Calling site** only uses the static factory — no knowledge of internals:
 
 ```dart
-QuickReplyCreationConfigWidget.showCreationDialog(context);
-QuickReplyCreationConfigWidget.showCreationDialog(context, existing: reply);
-QuickReplyDeletionConfigWidget.showDeletionDialog(context, reply);
+ExampleCreationConfigWidget.showCreationDialog(context);
+ExampleCreationConfigWidget.showCreationDialog(context, existing: example);
+ExampleDeletionConfigWidget.showDeletionDialog(context, example);
 ```
 
 ### Rules to always follow
