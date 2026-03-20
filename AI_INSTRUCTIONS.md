@@ -738,6 +738,109 @@ QuickReplyDeletionConfigWidget.showDeletionDialog(context, reply);
 - **`DroppableControllerHandler`** for mutations. **`SequentialControllerHandler`** for load/watch.
 - **`PopScope(canPop: state is! ...InProgressState)`** on every dialog with an async operation.
 
+## Stream-Returning Methods in Repositories
+
+Repository methods that return `Stream<T>` must always guarantee the stream is eventually closed. Never return a bare `StreamController.stream` without a close path — it leaks resources.
+
+### Pattern 1 — `onListen` / `onCancel` (lazy, resource-safe)
+
+Code runs only when someone starts listening. Resources are released when the subscriber cancels.
+
+```dart
+Stream<R> fn() {
+  final controller = StreamController<R>();
+  controller
+    ..onListen = () {
+      // Start emitting values only when the stream is listened to.
+      if (!controller.isClosed) controller.add(/* value of type R */);
+    }
+    ..onCancel = () {
+      // Clean up resources when the stream is cancelled.
+      if (!controller.isClosed) controller.close();
+    };
+  return controller.stream;
+}
+```
+
+Add a mutex or boolean flag to guarantee `close()` is never called while `onListen` is still executing, and to break any loop inside `onListen` when cancellation occurs.
+
+### Pattern 2 — `async Future` wrapper (simpler, more readable)
+
+The entire emission logic lives in an async closure. The `finally` block guarantees `close()` is always called.
+
+```dart
+Stream<R> fn() {
+  final controller = StreamController<R>();
+  Future<void>(() async {
+    try {
+      // Your emission logic here, e.g. a for(;;) loop.
+      controller.add(r);
+    } on Object catch (e, s) {
+      controller.addError(e, s);
+    } finally {
+      controller.close();
+    }
+  }).ignore();
+  return controller.stream;
+}
+```
+
+The async body can also be placed entirely inside `onListen` instead of a standalone `Future`.
+
+### One-shot helpers
+
+For simple cases prefer the built-in constructors over a manual controller:
+
+```dart
+Stream.value(r)               // single value then done
+Stream.fromFuture(future)     // single async value then done
+Stream.fromFutures([f1, f2])  // multiple async values then done
+```
+
+### Rule
+
+Every `Stream`-returning repository method must use one of the patterns above. A `StreamController` with no guaranteed `close()` path is always wrong.
+
+---
+
+## Multiple Controllers per Feature
+
+When a feature contains async operations with **different concurrency requirements**, split them into separate controllers — one per async concern. This is correct architecture, not over-engineering.
+
+### When to split controllers within one feature
+
+Split when two groups of async operations:
+
+- Need different concurrency handlers (`DroppableControllerHandler` vs `SequentialControllerHandler`), or
+- Maintain genuinely independent state that must update simultaneously without one overwriting the other.
+
+### Example — call feature
+
+```
+call/controller/
+├── call_controller.dart         — lifecycle (join/leave) → SequentialControllerHandler
+├── call_media_controller.dart   — mute/camera/flip       → DroppableControllerHandler
+└── call_members_controller.dart — participant tracking   → SequentialControllerHandler
+```
+
+Each controller handles one async concern. `CallMediaController` uses `Droppable` so rapid taps are dropped. `CallController` uses `Sequential` so join and leave are never interleaved. Sharing one controller would force a single concurrency strategy on all three — wrong for at least two of them.
+
+### Coordination rule
+
+Controllers within the same feature must **never import or depend on each other**. Coordinate them in the **widget layer** via `addListener` or `StateConsumer`'s `listener` parameter. The widget reacts to one controller's state and calls methods on another.
+
+```dart
+// ✅ Widget layer coordinates — controllers stay decoupled
+callController.addListener(() {
+  if (callController.state is Call$IdleState) {
+    callMembersController.reset();
+    callMediaController.reset();
+  }
+});
+```
+
+---
+
 ## Conclusion
 
 The AgoraWebRTC Flutter application demonstrates a well-implemented clean architecture with:
