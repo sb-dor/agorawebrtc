@@ -1,13 +1,16 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:control/control.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/src/common/constant/config.dart';
 import 'package:flutter_project/src/feature/call/controller/call_controller.dart';
 import 'package:flutter_project/src/feature/call/controller/call_media_controller.dart';
 import 'package:flutter_project/src/feature/call/controller/call_members_controller.dart';
 import 'package:flutter_project/src/feature/call/data/call_repository.dart';
+import 'package:flutter_project/src/feature/call/models/call_type.dart';
 import 'package:flutter_project/src/feature/call/widgets/active_call/call_active_widget.dart';
 import 'package:flutter_project/src/feature/meeting/models/meeting_params.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// Inherited widget that exposes [CallScreenState] to the active-call subtree.
 class CallConfigInhWidget extends InheritedWidget {
@@ -56,7 +59,28 @@ class CallScreenState extends State<CallScreen> {
     _initialize();
   }
 
+  @override
+  void dispose() {
+    if (_initialized) {
+      callController
+        ..removeListener(_onCallStateChanged)
+        ..dispose();
+      callMediaController.dispose();
+      callMembersController.dispose();
+      rtcEngine
+        ..unregisterEventHandler(const RtcEngineEventHandler())
+        ..release();
+    }
+    super.dispose();
+  }
+
   Future<void> _initialize() async {
+    final cameraPermission = await _requestPermissions();
+    if (!cameraPermission && mounted) {
+      Navigator.pop(context);
+      return;
+    }
+
     rtcEngine = createAgoraRtcEngine();
     await rtcEngine.initialize(const RtcEngineContext(appId: Config.agoraAppId));
 
@@ -103,32 +127,28 @@ class CallScreenState extends State<CallScreen> {
             ),
           );
         }
-        Navigator.of(context).pop();
+        if (mounted) Navigator.of(context).pop();
       }
     }
   }
 
-  @override
-  void dispose() {
-    if (_initialized) {
-      callController
-        ..removeListener(_onCallStateChanged)
-        ..dispose();
-      callMediaController.dispose();
-      callMembersController.dispose();
-      rtcEngine
-        ..unregisterEventHandler(const RtcEngineEventHandler())
-        ..release();
-    }
-    super.dispose();
+  Future<bool> _requestPermissions() async {
+    // permission_handler only supports Android and iOS.
+    // Desktop and web platforms handle permissions via OS-level mechanisms (entitlements, manifests, etc.).
+    if (kIsWeb) return true;
+    if (defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux ||
+        defaultTargetPlatform == TargetPlatform.windows) return true;
+    final permissions = <Permission>[Permission.microphone];
+    if (widget.params.callType == CallType.video) permissions.add(Permission.camera);
+    final result = await permissions.request();
+    return result.entries.every((value) => value.value == PermissionStatus.granted);
   }
 
   @override
   Widget build(BuildContext context) {
     if (_isInitializing) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator(color: Colors.teal)),
-      );
+      return const Scaffold(body: _ConnectingWidget());
     }
 
     return CallConfigInhWidget(
@@ -136,8 +156,7 @@ class CallScreenState extends State<CallScreen> {
       child: StateConsumer<CallController, CallState>(
         controller: callController,
         builder: (context, state, _) => switch (state) {
-          Call$IdleState() || Call$ErrorState() => const _ConnectingWidget(),
-          Call$JoiningState() => const _ConnectingWidget(),
+          Call$IdleState() || Call$ErrorState() || Call$JoiningState() => const _ConnectingWidget(),
           Call$ConnectedState() => const CallActiveWidget(),
         },
       ),
