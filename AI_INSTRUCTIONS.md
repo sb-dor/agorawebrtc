@@ -818,9 +818,9 @@ Split when two groups of async operations:
 
 ```
 call/controller/
-├── call_controller.dart         — lifecycle (join/leave) → SequentialControllerHandler
-├── call_media_controller.dart   — mute/camera/flip       → DroppableControllerHandler
-└── call_members_controller.dart — participant tracking   → SequentialControllerHandler
+├── call_controller.dart
+├── call_media_controller.dart
+└── call_members_controller.dart
 ```
 
 Each controller handles one async concern. `CallMediaController` uses `Droppable` so rapid taps are dropped. `CallController` uses `Sequential` so join and leave are never interleaved. Sharing one controller would force a single concurrency strategy on all three — wrong for at least two of them.

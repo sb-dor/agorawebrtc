@@ -36,26 +36,35 @@ final class CallRepositoryImpl implements ICallRepository {
     // ignore: close_sinks — closed implicitly when the engine handler is unregistered
     final streamController = StreamController<CallEvent>();
 
-    _engine.registerEventHandler(
-      RtcEngineEventHandler(
-        onJoinChannelSuccess: (connection, elapsed) {
-          streamController.add(CallEvent$Joined(connection.localUid ?? 0));
-        },
-        onUserJoined: (connection, remoteUid, elapsed) {
-          streamController.add(CallEvent$UserJoined(remoteUid));
-        },
-        onUserOffline: (connection, remoteUid, reason) {
-          streamController.add(CallEvent$UserLeft(remoteUid));
-        },
-        onError: (err, msg) {
-          streamController.add(CallEvent$Error(msg));
-        },
-        onLeaveChannel: (connection, elapsed) {
-          streamController.close();
-          l.d('current user is offline');
-        },
-      ),
-    );
+    Future<void> initialize() async {
+      if (streamController.isClosed) return;
+      _engine.registerEventHandler(
+        RtcEngineEventHandler(
+          onJoinChannelSuccess: (connection, elapsed) {
+            streamController.add(CallEvent$Joined(connection.localUid ?? 0));
+          },
+          onUserJoined: (connection, remoteUid, elapsed) {
+            streamController.add(CallEvent$UserJoined(remoteUid));
+          },
+          onUserOffline: (connection, remoteUid, reason) {
+            streamController.add(CallEvent$UserLeft(remoteUid));
+          },
+          onError: (err, msg) {
+            l.e('rrror $err');
+            streamController.add(CallEvent$Error(err.toString()));
+          },
+          onLeaveChannel: (connection, elapsed) {
+            if (!streamController.isClosed) {
+              streamController
+                ..add(CallEvent$Left(connection.localUid ?? 0))
+                ..close();
+            }
+          },
+        ),
+      );
+    }
+
+    initialize();
 
     return streamController.stream;
   }

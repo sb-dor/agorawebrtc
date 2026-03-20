@@ -2,25 +2,21 @@ import 'package:control/control.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_project/src/feature/authentication/data/authentication_repository.dart';
 import 'package:flutter_project/src/feature/authentication/model/user.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
-
-part 'authentication_controller.freezed.dart';
 
 /// for more information to change the controller's handler checkout this github page:
 /// https://github.com/PlugFox/control/tree/master/lib/src/concurrency
 
-@freezed
-sealed class AuthenticationState with _$AuthenticationState {
-  const AuthenticationState._();
+@immutable
+sealed class AuthenticationState {
+  const AuthenticationState();
 
   const factory AuthenticationState.idle() = Authentication$IdleState;
 
   const factory AuthenticationState.inProgress() = Authentication$InProgressState;
 
-  const factory AuthenticationState.error(final String? error) = Authentication$ErrorState;
+  const factory AuthenticationState.error(String? error) = Authentication$ErrorState;
 
-  const factory AuthenticationState.authenticated(final User user) =
-      Authentication$AuthenticatedState;
+  const factory AuthenticationState.authenticated(User user) = Authentication$AuthenticatedState;
 
   String? get error => switch (this) {
     final Authentication$ErrorState state => state.error,
@@ -31,6 +27,54 @@ sealed class AuthenticationState with _$AuthenticationState {
     final Authentication$AuthenticatedState state => state.user,
     _ => null,
   };
+}
+
+final class Authentication$IdleState extends AuthenticationState {
+  const Authentication$IdleState();
+}
+
+final class Authentication$InProgressState extends AuthenticationState {
+  const Authentication$InProgressState();
+}
+
+final class Authentication$ErrorState extends AuthenticationState {
+  const Authentication$ErrorState(this.error);
+
+  @override
+  final String? error;
+
+  Authentication$ErrorState copyWith({String? error}) =>
+      Authentication$ErrorState(error ?? this.error);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is Authentication$ErrorState && error == other.error);
+
+  @override
+  int get hashCode => error.hashCode;
+
+  @override
+  String toString() => 'AuthenticationState.error(error: $error)';
+}
+
+final class Authentication$AuthenticatedState extends AuthenticationState {
+  const Authentication$AuthenticatedState(this.user);
+
+  @override
+  final User user;
+
+  Authentication$AuthenticatedState copyWith({User? user}) =>
+      Authentication$AuthenticatedState(user ?? this.user);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is Authentication$AuthenticatedState && user == other.user);
+
+  @override
+  int get hashCode => user.hashCode;
+
+  @override
+  String toString() => 'AuthenticationState.authenticated(user: $user)';
 }
 
 final class AuthenticationController extends StateController<AuthenticationState>

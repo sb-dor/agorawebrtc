@@ -56,22 +56,19 @@ final class MeetingController extends StateController<MeetingState>
     required CallType callType,
     required int uid,
     String? tempToken,
-  }) => handle(
-    () async {
-      setState(MeetingState.preparing(callType: callType));
+  }) => handle(() async {
+    setState(MeetingState.preparing(callType: callType));
 
-      final token = (tempToken != null && tempToken.isNotEmpty)
-          ? tempToken
-          : await _tokenRepository.generateToken(channelName: channelName, uid: uid);
+    final token = (tempToken != null && tempToken.isNotEmpty)
+        ? tempToken
+        : await _tokenRepository.generateToken(channelName: channelName, uid: uid);
 
-      setState(
-        MeetingState.ready(
-          MeetingParams(channelName: channelName, callType: callType, uid: uid, token: token),
-        ),
-      );
-    },
-    error: (e, st) async => setState(MeetingState.error(e.toString())),
-  );
+    setState(
+      MeetingState.ready(
+        MeetingParams(channelName: channelName, callType: callType, uid: uid, token: token),
+      ),
+    );
+  }, error: (e, st) async => setState(MeetingState.error(e.toString())));
 
   /// Returns to idle — called from the widget layer after navigation completes
   /// or after an error is shown.

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/src/common/widget/scaffold_padding.dart';
 import 'package:flutter_project/src/feature/authentication/widget/authentication_scope.dart';
 
 /// {@template signin_screen}
@@ -39,61 +40,62 @@ class _SignInScreenState extends State<SignInScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Icon(Icons.video_call_rounded, size: 80, color: Colors.teal),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Agora Call',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Enter your display name to continue',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70),
-                  ),
-                  const SizedBox(height: 40),
-                  TextField(
-                    controller: _nameController,
-                    textCapitalization: TextCapitalization.words,
-                    autofocus: true,
-                    maxLength: 30,
-                    onChanged: (_) => setState(() => _nameError = null),
-                    onSubmitted: (_) => _submit(),
-                    decoration: InputDecoration(
-                      labelText: 'Display Name',
-                      hintText: 'e.g. Alex Johnson',
-                      prefixIcon: const Icon(Icons.person),
-                      errorText: _nameError,
-                      border: const OutlineInputBorder(),
+        child: CustomScrollView(
+          slivers: [
+            SliverFillRemaining(
+              child: Padding(
+                padding: ScaffoldPadding.of(context),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Icon(Icons.video_call_rounded, size: 80, color: Colors.teal),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Agora Call',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  AnimatedBuilder(
-                    animation: _nameController,
-                    builder: (context, _) => FilledButton.icon(
-                      onPressed: _isValid ? _submit : null,
-                      icon: const Icon(Icons.arrow_forward),
-                      label: const Text('Continue'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Enter your display name to continue',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                    ),
+                    const SizedBox(height: 40),
+                    TextField(
+                      controller: _nameController,
+                      textCapitalization: TextCapitalization.words,
+                      autofocus: true,
+                      maxLength: 30,
+                      onChanged: (_) => setState(() => _nameError = null),
+                      onSubmitted: (_) => _submit(),
+                      decoration: InputDecoration(
+                        labelText: 'Display Name',
+                        hintText: 'e.g. Alex Johnson',
+                        prefixIcon: const Icon(Icons.person),
+                        errorText: _nameError,
+                        border: const OutlineInputBorder(),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 24),
+                    AnimatedBuilder(
+                      animation: _nameController,
+                      builder: (context, _) => FilledButton.icon(
+                        onPressed: _isValid ? _submit : null,
+                        icon: const Icon(Icons.arrow_forward),
+                        label: const Text('Continue'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

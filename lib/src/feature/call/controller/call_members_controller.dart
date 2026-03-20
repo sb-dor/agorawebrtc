@@ -66,6 +66,9 @@ final class CallMembersController extends StateController<CallMembersState>
     switch (event) {
       case CallEvent$Joined(:final localUid):
         setState(CallMembersState.active(localUid: localUid, remoteUids: const []));
+      case CallEvent$Left():
+        _subscription?.cancel();
+        setState(const CallMembersState.idle());
       case CallEvent$UserJoined(:final uid):
         _whenActive((s) => s.copyWith(remoteUids: [...s.remoteUids, uid]));
       case CallEvent$UserLeft(:final uid):

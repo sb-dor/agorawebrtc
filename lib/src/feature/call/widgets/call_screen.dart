@@ -138,7 +138,8 @@ class CallScreenState extends State<CallScreen> {
     if (kIsWeb) return true;
     if (defaultTargetPlatform == TargetPlatform.macOS ||
         defaultTargetPlatform == TargetPlatform.linux ||
-        defaultTargetPlatform == TargetPlatform.windows) return true;
+        defaultTargetPlatform == TargetPlatform.windows)
+      return true;
     final permissions = <Permission>[Permission.microphone];
     if (widget.params.callType == CallType.video) permissions.add(Permission.camera);
     final result = await permissions.request();

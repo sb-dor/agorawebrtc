@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_project/src/common/database/database.dart';
 import 'package:flutter_project/src/common/model/app_metadata.dart';
 import 'package:flutter_project/src/common/util/api_client.dart';
 import 'package:flutter_project/src/feature/authentication/controller/authentication_controller.dart';
@@ -27,9 +26,6 @@ class Dependencies {
 
   /// Shared preferences
   late final SharedPreferences sharedPreferences;
-
-  /// Database
-  late final AppDatabase database;
 
   /// API Client
   late final ApiClient apiClient;

@@ -8,7 +8,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "args": [
-        "--dart-define-from-file=config/development.json",
+        "--dart-define-from-file=config/production.json",
       ],
       "env": {}
     },
@@ -19,7 +19,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "args": [
-        "--dart-define-from-file=config/development.json",
+        "--dart-define-from-file=config/production.json",
         "--dart-define=DROP_DATABASE=true"
       ],
       "env": {}
@@ -31,7 +31,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "args": [
-        "--dart-define-from-file=config/development.json",
+        "--dart-define-from-file=config/production.json",
         "--dart-define=IN_MEMORY_DATABASE=true"
       ],
       "env": {}
@@ -43,7 +43,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "args": [
-        "--dart-define-from-file=config/development.json",
+        "--dart-define-from-file=config/production.json",
         "--device-id=web-server",
       ],
       "env": {}

@@ -3,9 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_project/src/common/constant/pubspec.yaml.g.dart';
 import 'package:flutter_project/src/common/localization/localization.dart';
 import 'package:flutter_project/src/common/widget/scaffold_padding.dart';
-import 'package:flutter_project/src/feature/developer/widget/logs_dialog.dart';
-import 'package:flutter_project/src/feature/initialization/models/dependencies.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart' as url_launcher;
 
 /// {@template developer_screen}
@@ -50,7 +47,6 @@ class DeveloperScreen extends StatelessWidget {
         const _ShowLicensePageTile(),
         const _ShowApplicationDependenciesTile(),
         const _ShowApplicationDevDependenciesTile(),
-        const _ShowLogsScreenTile(),
 
         // // --- Navigation --- //
         // _GroupSeparator(title: Localization.of(context).navigation),
@@ -59,7 +55,6 @@ class DeveloperScreen extends StatelessWidget {
         // --- Database --- //
         _GroupSeparator(title: Localization.of(context).database),
         /* const _ViewDatabaseTile(), */
-        const _ClearDatabaseTile(),
 
         // --- Useful links --- //
         _GroupSeparator(title: Localization.of(context).usefulLinks),
@@ -337,22 +332,6 @@ class _ShowApplicationDevDependenciesTile extends StatelessWidget {
   );
 }
 
-class _ShowLogsScreenTile extends StatelessWidget {
-  const _ShowLogsScreenTile();
-
-  @override
-  Widget build(BuildContext context) => SliverPadding(
-    padding: ScaffoldPadding.of(context),
-    sliver: SliverToBoxAdapter(
-      child: ListTile(
-        title: const Text('Logs'),
-        subtitle: const Text('Show logs.', maxLines: 1, overflow: TextOverflow.ellipsis),
-        onTap: () => LogsDialog.show(context).ignore(),
-      ),
-    ),
-  );
-}
-
 // class _ResetNavigationTile extends StatelessWidget {
 //   const _ResetNavigationTile();
 
@@ -396,81 +375,6 @@ class _ShowLogsScreenTile extends StatelessWidget {
         ),
       );
 } */
-
-class _ClearDatabaseTile extends StatelessWidget {
-  const _ClearDatabaseTile();
-
-  @override
-  Widget build(BuildContext context) => SliverPadding(
-    padding: ScaffoldPadding.of(context),
-    sliver: SliverToBoxAdapter(
-      child: ListTile(
-        title: const Text('Drop database and local cache'),
-        subtitle: const Text(
-          'Clear database content.',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        onTap: () {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Are you sure?'),
-              content: const Text('All data will be cleared'),
-              actions: [
-                TextButton(
-                  onPressed: () async {
-                    final db = Dependencies.of(context).database;
-                    final messenger = ScaffoldMessenger.maybeOf(context);
-                    Future<void>(() async {
-                      try {
-                        await db.customStatement('PRAGMA foreign_keys = OFF');
-                        try {
-                          await db.batch((batch) {
-                            // ignore: prefer_foreach
-                            for (final table in db.allTables) {
-                              batch.deleteAll(table);
-                            }
-                          });
-                        } finally {
-                          await db.customStatement('PRAGMA foreign_keys = ON');
-                        }
-                        final sharedPreferences = await SharedPreferences.getInstance();
-                        await sharedPreferences.clear();
-                        messenger
-                          ?..clearSnackBars()
-                          ..showSnackBar(
-                            const SnackBar(
-                              content: Text('Database cleared'),
-                              duration: Duration(seconds: 3),
-                            ),
-                          );
-
-                        if (context.mounted) Navigator.pop(context);
-                      } on Object catch (error) {
-                        messenger
-                          ?..clearSnackBars()
-                          ..showSnackBar(
-                            SnackBar(
-                              content: Text('Database clear failed: $error'),
-                              backgroundColor: Colors.red,
-                              duration: const Duration(seconds: 3),
-                            ),
-                          );
-                      }
-                    });
-                  },
-                  child: const Text('Yes'),
-                ),
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text('No')),
-              ],
-            ),
-          );
-        },
-      ),
-    ),
-  );
-}
 
 class _OpenUriTile extends StatelessWidget {
   const _OpenUriTile({

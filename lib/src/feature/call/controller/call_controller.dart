@@ -2,10 +2,9 @@ import 'dart:async';
 
 import 'package:control/control.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_project/src/feature/call/models/call_event.dart';
 import 'package:flutter_project/src/feature/call/data/call_repository.dart';
+import 'package:flutter_project/src/feature/call/models/call_event.dart';
 import 'package:flutter_project/src/feature/call/models/call_type.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 @immutable
 sealed class CallState {
@@ -125,7 +124,13 @@ final class CallController extends StateController<CallState> with SequentialCon
             ),
           );
         }
+      case CallEvent$Left():
+        if (state is Call$ConnectedState) {
+          _eventsSubscription?.cancel();
+          setState(const CallState.idle());
+        }
       case CallEvent$Error(:final message):
+        onError('Errororor: $message', StackTrace.current);
         setState(CallState.error(message));
       case CallEvent$UserJoined() || CallEvent$UserLeft():
         break; // handled by CallMembersController
@@ -138,39 +143,20 @@ final class CallController extends StateController<CallState> with SequentialCon
     required CallType callType,
     required int uid,
     String? token,
-  }) => handle(
-    () async {
-      await _requestPermissions(callType);
-      setState(CallState.joining(channelName: channelName, callType: callType));
-      await _callRepository.joinChannel(
-        channelName: channelName,
-        token: token,
-        uid: uid,
-        callType: callType,
-      );
-    },
-    error: (e, st) async => setState(CallState.error(e.toString())),
-  );
+  }) => handle(() async {
+    setState(CallState.joining(channelName: channelName, callType: callType));
+    await _callRepository.joinChannel(
+      channelName: channelName,
+      token: token,
+      uid: uid,
+      callType: callType,
+    );
+  }, error: (e, st) async => setState(CallState.error(e.toString())));
 
   /// Leaves the current channel and returns to idle.
-  void leave() => handle(
-    () async {
-      await _callRepository.leaveChannel();
-      setState(const CallState.idle());
-    },
-    error: (e, st) async => setState(const CallState.idle()),
-  );
-
-  Future<void> _requestPermissions(CallType callType) async {
-    if (kIsWeb) return;
-    try {
-      final permissions = <Permission>[Permission.microphone];
-      if (callType == CallType.video) permissions.add(Permission.camera);
-      await permissions.request();
-    } on Exception catch (_) {
-      // Some platforms don't support explicit permission requests; ignore.
-    }
-  }
+  void leave() => handle(() async {
+    await _callRepository.leaveChannel();
+  }, error: (e, st) async => setState(const CallState.idle()));
 
   @override
   void dispose() {

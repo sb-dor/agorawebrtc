@@ -13,6 +13,13 @@ final class CallEvent$Joined extends CallEvent {
   final int localUid;
 }
 
+/// Fired when the local user leaves the channel.
+final class CallEvent$Left extends CallEvent {
+  const CallEvent$Left(this.localUid);
+
+  final int localUid;
+}
+
 /// Fired when a remote user joins the channel.
 final class CallEvent$UserJoined extends CallEvent {
   const CallEvent$UserJoined(this.uid);
