@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter_project/src/feature/call/models/call_event.dart';
 import 'package:flutter_project/src/feature/call/models/call_type.dart';
+import 'package:l/l.dart';
 
 /// Contract for managing Agora RTC engine operations.
 abstract interface class ICallRepository {
-  Future<void> initialize(String appId);
+  Stream<CallEvent> onCallEvents();
 
   Future<void> joinChannel({
     required String channelName,
@@ -22,49 +23,41 @@ abstract interface class ICallRepository {
   Future<void> toggleCamera(bool disable);
 
   Future<void> switchCamera();
-
-  RtcEngine get engine;
-
-  Stream<CallEvent> get events;
-
-  void dispose();
 }
 
 /// Agora RTC engine implementation of [ICallRepository].
 final class CallRepositoryImpl implements ICallRepository {
-  final StreamController<CallEvent> _streamController = StreamController<CallEvent>.broadcast();
+  CallRepositoryImpl(this._engine);
 
-  late final RtcEngine _engine;
-  bool _initialized = false;
-
-  @override
-  RtcEngine get engine => _engine;
+  final RtcEngine _engine;
 
   @override
-  Stream<CallEvent> get events => _streamController.stream;
+  Stream<CallEvent> onCallEvents() {
+    // ignore: close_sinks — closed implicitly when the engine handler is unregistered
+    final streamController = StreamController<CallEvent>();
 
-  @override
-  Future<void> initialize(String appId) async {
-    if (_initialized) return;
-    _engine = createAgoraRtcEngine();
-    await _engine.initialize(RtcEngineContext(appId: appId));
     _engine.registerEventHandler(
       RtcEngineEventHandler(
         onJoinChannelSuccess: (connection, elapsed) {
-          _streamController.add(CallEvent$Joined(connection.localUid ?? 0));
+          streamController.add(CallEvent$Joined(connection.localUid ?? 0));
         },
         onUserJoined: (connection, remoteUid, elapsed) {
-          _streamController.add(CallEvent$UserJoined(remoteUid));
+          streamController.add(CallEvent$UserJoined(remoteUid));
         },
         onUserOffline: (connection, remoteUid, reason) {
-          _streamController.add(CallEvent$UserLeft(remoteUid));
+          streamController.add(CallEvent$UserLeft(remoteUid));
         },
         onError: (err, msg) {
-          _streamController.add(CallEvent$Error(msg));
+          streamController.add(CallEvent$Error(msg));
+        },
+        onLeaveChannel: (connection, elapsed) {
+          streamController.close();
+          l.d('current user is offline');
         },
       ),
     );
-    _initialized = true;
+
+    return streamController.stream;
   }
 
   @override
@@ -114,12 +107,4 @@ final class CallRepositoryImpl implements ICallRepository {
 
   @override
   Future<void> switchCamera() => _engine.switchCamera();
-
-  @override
-  void dispose() {
-    _engine
-      ..unregisterEventHandler(const RtcEngineEventHandler())
-      ..release();
-    _streamController.close();
-  }
 }

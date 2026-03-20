@@ -1,20 +1,15 @@
 import 'dart:async';
 
-import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:control/control.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_project/src/feature/call/data/call_repository.dart';
-import 'package:flutter_project/src/feature/call/data/token_repository.dart';
 import 'package:flutter_project/src/feature/call/models/call_event.dart';
+import 'package:flutter_project/src/feature/call/data/call_repository.dart';
 import 'package:flutter_project/src/feature/call/models/call_type.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-part 'call_controller.freezed.dart';
-
-@freezed
-sealed class CallState with _$CallState {
-  const CallState._();
+@immutable
+sealed class CallState {
+  const CallState();
 
   const factory CallState.idle() = Call$IdleState;
 
@@ -25,9 +20,6 @@ sealed class CallState with _$CallState {
     required String channelName,
     required CallType callType,
     required int localUid,
-    required List<int> remoteUids,
-    required bool isMuted,
-    required bool isCameraOff,
   }) = Call$ConnectedState;
 
   const factory CallState.error(String message) = Call$ErrorState;
@@ -35,31 +27,90 @@ sealed class CallState with _$CallState {
   bool get isInCall => this is Call$ConnectedState || this is Call$JoiningState;
 }
 
-/// Manages the Agora call lifecycle: initialize, join, leave, and local
-/// media controls.
-final class CallController extends StateController<CallState> with DroppableControllerHandler {
+final class Call$IdleState extends CallState {
+  const Call$IdleState();
+}
+
+final class Call$JoiningState extends CallState {
+  const Call$JoiningState({required this.channelName, required this.callType});
+
+  final String channelName;
+  final CallType callType;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Call$JoiningState &&
+          channelName == other.channelName &&
+          callType == other.callType);
+
+  @override
+  int get hashCode => channelName.hashCode ^ callType.hashCode;
+
+  @override
+  String toString() => 'CallState.joining(channelName: $channelName, callType: $callType)';
+}
+
+final class Call$ConnectedState extends CallState {
+  const Call$ConnectedState({
+    required this.channelName,
+    required this.callType,
+    required this.localUid,
+  });
+
+  final String channelName;
+  final CallType callType;
+  final int localUid;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Call$ConnectedState &&
+          channelName == other.channelName &&
+          callType == other.callType &&
+          localUid == other.localUid);
+
+  @override
+  int get hashCode => channelName.hashCode ^ callType.hashCode ^ localUid.hashCode;
+
+  @override
+  String toString() =>
+      'CallState.connected(channelName: $channelName, callType: $callType, localUid: $localUid)';
+}
+
+final class Call$ErrorState extends CallState {
+  const Call$ErrorState(this.message);
+
+  final String message;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is Call$ErrorState && message == other.message);
+
+  @override
+  int get hashCode => message.hashCode;
+
+  @override
+  String toString() => 'CallState.error(message: $message)';
+}
+
+/// Manages the call lifecycle: join, leave, and error recovery.
+/// Media controls and participant tracking are handled by dedicated controllers.
+final class CallController extends StateController<CallState> with SequentialControllerHandler {
   CallController({
     required ICallRepository callRepository,
-    required String appId,
-    ITokenRepository tokenRepository = const TokenRepositoryNoop(),
     super.initialState = const CallState.idle(),
-  }) : _callRepository = callRepository,
-       _appId = appId,
-       _tokenRepository = tokenRepository;
+  }) : _callRepository = callRepository {
+    _eventsSubscription = _callRepository.onCallEvents().listen(_onCallEvent);
+  }
 
   final ICallRepository _callRepository;
-  final ITokenRepository _tokenRepository;
-  final String _appId;
   StreamSubscription<CallEvent>? _eventsSubscription;
 
   /// Exposes the underlying engine for video view rendering.
-  RtcEngine get engine => _callRepository.engine;
-
-  /// Initializes the Agora engine. Called once from the config widget.
-  void initialize() => handle(() async {
-    await _callRepository.initialize(_appId);
-    _eventsSubscription = _callRepository.events.listen(_onCallEvent);
-  }, error: (e, st) async => setState(CallState.error('Initialization failed: $e')));
+  // ignore: deprecated_member_use_from_same_package
+  // ignore: invalid_use_of_visible_for_testing_member
+  // Access via CallConfigInhWidget.of(context).rtcEngine instead where possible.
 
   void _onCallEvent(CallEvent event) {
     switch (event) {
@@ -71,97 +122,44 @@ final class CallController extends StateController<CallState> with DroppableCont
               channelName: current.channelName,
               callType: current.callType,
               localUid: localUid,
-              remoteUids: const [],
-              isMuted: false,
-              isCameraOff: false,
             ),
           );
         }
-      case CallEvent$UserJoined(:final uid):
-        _whenConnected((s) => s.copyWith(remoteUids: [...s.remoteUids, uid]));
-      case CallEvent$UserLeft(:final uid):
-        _whenConnected((s) => s.copyWith(remoteUids: s.remoteUids.where((u) => u != uid).toList()));
       case CallEvent$Error(:final message):
         setState(CallState.error(message));
+      case CallEvent$UserJoined() || CallEvent$UserLeft():
+        break; // handled by CallMembersController
     }
   }
 
-  void _whenConnected(Call$ConnectedState Function(Call$ConnectedState) updater) {
-    final current = state;
-    if (current is Call$ConnectedState) setState(updater(current));
-  }
-
-  /// Joins a channel with the given parameters.
-  ///
-  /// Token priority:
-  ///   1. [token] if explicitly provided (e.g. a temp token from config)
-  ///   2. A freshly generated token from [ITokenRepository] (when App Certificate is set)
-  ///   3. No token — works when the Agora project uses App ID-only auth
+  /// Joins a channel with the supplied [token] (null = no-token mode).
   void join({
     required String channelName,
     required CallType callType,
     required int uid,
     String? token,
-  }) => handle(() async {
-    if (_appId.isEmpty) {
-      setState(
-        const CallState.error(
-          'Agora App ID is not configured. '
-          'Add AGORA_APP_ID to your config file.',
-        ),
+  }) => handle(
+    () async {
+      await _requestPermissions(callType);
+      setState(CallState.joining(channelName: channelName, callType: callType));
+      await _callRepository.joinChannel(
+        channelName: channelName,
+        token: token,
+        uid: uid,
+        callType: callType,
       );
-      return;
-    }
-    await _requestPermissions(callType);
-    setState(CallState.joining(channelName: channelName, callType: callType));
-
-    // Resolve effective token: explicit → generated → none
-    final effectiveToken = (token != null && token.isNotEmpty)
-        ? token
-        : _tokenRepository.generateToken(channelName: channelName, uid: uid);
-
-    await _callRepository.joinChannel(
-      channelName: channelName,
-      token: effectiveToken,
-      uid: uid,
-      callType: callType,
-    );
-  }, error: (e, st) async => setState(CallState.error(e.toString())));
+    },
+    error: (e, st) async => setState(CallState.error(e.toString())),
+  );
 
   /// Leaves the current channel and returns to idle.
-  void leave() => handle(() async {
-    await _callRepository.leaveChannel();
-    setState(const CallState.idle());
-  }, error: (e, st) async => setState(const CallState.idle()));
-
-  /// Toggles local microphone mute.
-  void toggleMute() => handle(() async {
-    final current = state;
-    if (current is! Call$ConnectedState) return;
-    final newMuted = !current.isMuted;
-    await _callRepository.toggleMute(newMuted);
-    setState(current.copyWith(isMuted: newMuted));
-  });
-
-  /// Toggles local camera on/off.
-  void toggleCamera() => handle(() async {
-    final current = state;
-    if (current is! Call$ConnectedState) return;
-    final newCameraOff = !current.isCameraOff;
-    await _callRepository.toggleCamera(newCameraOff);
-    setState(current.copyWith(isCameraOff: newCameraOff));
-  });
-
-  /// Switches between front and rear cameras.
-  void switchCamera() => handle(() async {
-    await _callRepository.switchCamera();
-  });
-
-  /// Resets error state and re-initializes the engine.
-  void retryInit() {
-    setState(const CallState.idle());
-    initialize();
-  }
+  void leave() => handle(
+    () async {
+      await _callRepository.leaveChannel();
+      setState(const CallState.idle());
+    },
+    error: (e, st) async => setState(const CallState.idle()),
+  );
 
   Future<void> _requestPermissions(CallType callType) async {
     if (kIsWeb) return;
@@ -177,7 +175,6 @@ final class CallController extends StateController<CallState> with DroppableCont
   @override
   void dispose() {
     _eventsSubscription?.cancel();
-    _callRepository.dispose();
     super.dispose();
   }
 }
