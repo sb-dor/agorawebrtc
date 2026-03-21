@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Circular avatar row used in the audio call view.
 class ParticipantAvatars extends StatelessWidget {
-  const ParticipantAvatars({
-    super.key,
-    required this.remoteUids,
-    required this.mutedUids,
-  });
+  const ParticipantAvatars({super.key, required this.remoteUids, required this.mutedUids});
 
   final List<int> remoteUids;
 
@@ -48,10 +44,7 @@ class ParticipantAvatars extends StatelessWidget {
                     right: 0,
                     child: Container(
                       padding: const EdgeInsets.all(3),
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
+                      decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
                       child: const Icon(Icons.mic_off, color: Colors.white, size: 12),
                     ),
                   ),

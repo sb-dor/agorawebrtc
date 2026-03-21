@@ -28,42 +28,44 @@ class _CallActiveWidgetState extends State<CallActiveWidget> {
     controller: _callController,
     builder: (context, callState, _) {
       if (callState is! Call$ConnectedState) return const SizedBox.shrink();
-      return StateConsumer<CallMembersController, CallMembersState>(
-        controller: _membersController,
-        builder: (context, membersState, _) {
-          final activeMembers = membersState is CallMembers$ActiveState ? membersState : null;
-          final remoteUids = activeMembers?.remoteUids ?? const <int>[];
-          final remoteMutedAudio = activeMembers?.remoteMutedAudio ?? const <int, bool>{};
-          final remoteCameraOff = activeMembers?.remoteCameraOff ?? const <int, bool>{};
+      return SafeArea(
+        child: StateConsumer<CallMembersController, CallMembersState>(
+          controller: _membersController,
+          builder: (context, membersState, _) {
+            final activeMembers = membersState is CallMembers$ActiveState ? membersState : null;
+            final remoteUids = activeMembers?.remoteUids ?? const <int>[];
+            final remoteMutedAudio = activeMembers?.remoteMutedAudio ?? const <int, bool>{};
+            final remoteCameraOff = activeMembers?.remoteCameraOff ?? const <int, bool>{};
 
-          return StateConsumer<CallMediaController, CallMediaState>(
-            controller: _mediaController,
-            builder: (context, mediaState, _) {
-              if (callState.callType == CallType.video) {
-                return VideoCallView(
+            return StateConsumer<CallMediaController, CallMediaState>(
+              controller: _mediaController,
+              builder: (context, mediaState, _) {
+                if (callState.callType == CallType.video) {
+                  return VideoCallView(
+                    callState: callState,
+                    remoteUids: remoteUids,
+                    mediaState: mediaState,
+                    callController: _callController,
+                    mediaController: _mediaController,
+                    remoteMutedAudio: remoteMutedAudio,
+                    remoteCameraOff: remoteCameraOff,
+                  );
+                }
+                return AudioCallView(
                   callState: callState,
                   remoteUids: remoteUids,
                   mediaState: mediaState,
                   callController: _callController,
                   mediaController: _mediaController,
-                  remoteMutedAudio: remoteMutedAudio,
-                  remoteCameraOff: remoteCameraOff,
+                  remoteMutedUids: remoteMutedAudio.entries
+                      .where((e) => e.value)
+                      .map((e) => e.key)
+                      .toSet(),
                 );
-              }
-              return AudioCallView(
-                callState: callState,
-                remoteUids: remoteUids,
-                mediaState: mediaState,
-                callController: _callController,
-                mediaController: _mediaController,
-                remoteMutedUids: remoteMutedAudio.entries
-                    .where((e) => e.value)
-                    .map((e) => e.key)
-                    .toSet(),
-              );
-            },
-          );
-        },
+              },
+            );
+          },
+        ),
       );
     },
   );

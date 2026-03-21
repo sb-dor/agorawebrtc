@@ -140,6 +140,7 @@ class _MeetingScreenState extends State<MeetingScreen> {
           return CustomScrollView(
             slivers: [
               SliverFillRemaining(
+                hasScrollBody: false,
                 child: Padding(
                   padding: ScaffoldPadding.of(context),
                   child: Column(

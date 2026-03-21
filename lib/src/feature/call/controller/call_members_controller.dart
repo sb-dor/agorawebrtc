@@ -91,31 +91,31 @@ final class CallMembersController extends StateController<CallMembersState>
   void _onEvent(CallEvent event) {
     switch (event) {
       case CallEvent$Joined(:final localUid):
-        setState(CallMembersState.active(
-          localUid: localUid,
-          remoteUids: const [],
-          remoteMutedAudio: const {},
-          remoteCameraOff: const {},
-        ));
+        setState(
+          CallMembersState.active(
+            localUid: localUid,
+            remoteUids: const [],
+            remoteMutedAudio: const {},
+            remoteCameraOff: const {},
+          ),
+        );
       case CallEvent$Left():
         _subscription?.cancel();
         setState(const CallMembersState.idle());
       case CallEvent$UserJoined(:final uid):
         _whenActive((s) => s.copyWith(remoteUids: [...s.remoteUids, uid]));
       case CallEvent$UserLeft(:final uid):
-        _whenActive((s) => s.copyWith(
-          remoteUids: s.remoteUids.where((u) => u != uid).toList(),
-          remoteMutedAudio: Map.of(s.remoteMutedAudio)..remove(uid),
-          remoteCameraOff: Map.of(s.remoteCameraOff)..remove(uid),
-        ));
+        _whenActive(
+          (s) => s.copyWith(
+            remoteUids: s.remoteUids.where((u) => u != uid).toList(),
+            remoteMutedAudio: Map.of(s.remoteMutedAudio)..remove(uid),
+            remoteCameraOff: Map.of(s.remoteCameraOff)..remove(uid),
+          ),
+        );
       case CallEvent$UserMutedAudio(:final uid, :final muted):
-        _whenActive((s) => s.copyWith(
-          remoteMutedAudio: {...s.remoteMutedAudio, uid: muted},
-        ));
+        _whenActive((s) => s.copyWith(remoteMutedAudio: {...s.remoteMutedAudio, uid: muted}));
       case CallEvent$UserMutedVideo(:final uid, :final muted):
-        _whenActive((s) => s.copyWith(
-          remoteCameraOff: {...s.remoteCameraOff, uid: muted},
-        ));
+        _whenActive((s) => s.copyWith(remoteCameraOff: {...s.remoteCameraOff, uid: muted}));
       case CallEvent$Error():
         break; // handled by CallController
     }
