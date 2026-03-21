@@ -4,7 +4,7 @@
   <img src="https://raw.githubusercontent.com/sb-dor/agorawebrtc/refs/heads/main/github_assets/mobile.png" alt="Screenshot 1" width="200" />
 </p>
 
-## Web Screenshots
+## Other Screenshots
 
 <p float="left">
   <img src="https://raw.githubusercontent.com/sb-dor/agorawebrtc/refs/heads/main/github_assets/multi_device.png" alt="Screenshot WEB 1" width="820" />
