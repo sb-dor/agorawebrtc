@@ -84,7 +84,6 @@ class CallScreenState extends State<CallScreen> {
 
     rtcEngine = createAgoraRtcEngine();
 
-    /// agoraAppOd exists
     l.d('DEBUG appId: "${Config.agoraAppId}"');
     await rtcEngine.initialize(const RtcEngineContext(appId: Config.agoraAppId));
 

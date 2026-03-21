@@ -50,7 +50,7 @@ final class CallRepositoryImpl implements ICallRepository {
             streamController.add(CallEvent$UserLeft(remoteUid));
           },
           onError: (err, msg) {
-            l.e('rrror $err');
+            l.e('error $err');
             streamController.add(CallEvent$Error(err.toString()));
           },
           onLeaveChannel: (connection, elapsed) {

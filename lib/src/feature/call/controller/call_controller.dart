@@ -130,7 +130,7 @@ final class CallController extends StateController<CallState> with SequentialCon
           setState(const CallState.idle());
         }
       case CallEvent$Error(:final message):
-        onError('Errororor: $message', StackTrace.current);
+        onError('Error: $message', StackTrace.current);
         setState(CallState.error(message));
       case CallEvent$UserJoined() || CallEvent$UserLeft():
         break; // handled by CallMembersController
