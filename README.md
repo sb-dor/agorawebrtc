@@ -192,3 +192,19 @@ Permissions are pre-configured for all supported platforms:
 ```bash
 dart run tool/dart/rename_project.dart --name="project" --organization="dev.flutter" --description="My project description"
 ```
+
+
+## Mobile Screenshots
+<p float="left">
+  <img src="https://raw.githubusercontent.com/sb-dor/agorawebrtc/refs/heads/main/github_assets/Screenshot_1774091275.png" alt="Screenshot 1" width="200" />
+</p>
+
+
+## Web Screenshots
+<p float="left">
+  <img src="https://raw.githubusercontent.com/sb-dor/agorawebrtc/refs/heads/main/github_assets/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%202026-03-21%20%D0%B2%2016.08.12.png" alt="Screenshot WEB 1" width="820" />
+</p>
+
+<p float="left">
+  <img src="https://raw.githubusercontent.com/sb-dor/simple_pos/refs/heads/main/app_pics/web_2.png" alt="Screenshot WEB 2" width="820" />
+</p>
