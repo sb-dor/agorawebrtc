@@ -1,5 +1,5 @@
+import 'package:agorawebrtc/src/features/initialization/models/dependencies.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/src/features/initialization/models/dependencies.dart';
 
 /// {@template inherited_dependencies}
 /// InheritedDependencies widget.

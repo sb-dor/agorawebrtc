@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/empty_slot_tile.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/participant_tile.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/empty_slot_tile.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/participant_tile.dart';
 
 /// Grid showing every participant including the local user (uid 0).
 /// Empty slots fill any remainder with [EmptySlotTile].

@@ -1,18 +1,18 @@
 import 'dart:async';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:agorawebrtc/src/common/constant/config.dart';
+import 'package:agorawebrtc/src/features/call/controller/call_controller.dart';
+import 'package:agorawebrtc/src/features/call/controller/call_media_controller.dart';
+import 'package:agorawebrtc/src/features/call/controller/call_members_controller.dart';
+import 'package:agorawebrtc/src/features/call/data/call_repository.dart';
+import 'package:agorawebrtc/src/features/call/models/call_event.dart';
+import 'package:agorawebrtc/src/features/call/models/call_type.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/call_active_widget.dart';
+import 'package:agorawebrtc/src/features/meeting/models/meeting_params.dart';
 import 'package:control/control.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/src/common/constant/config.dart';
-import 'package:flutter_project/src/features/call/controller/call_controller.dart';
-import 'package:flutter_project/src/features/call/controller/call_media_controller.dart';
-import 'package:flutter_project/src/features/call/controller/call_members_controller.dart';
-import 'package:flutter_project/src/features/call/data/call_repository.dart';
-import 'package:flutter_project/src/features/call/models/call_event.dart';
-import 'package:flutter_project/src/features/call/models/call_type.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/call_active_widget.dart';
-import 'package:flutter_project/src/features/meeting/models/meeting_params.dart';
 import 'package:l/l.dart';
 import 'package:permission_handler/permission_handler.dart';
 

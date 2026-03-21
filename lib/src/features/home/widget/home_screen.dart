@@ -1,5 +1,5 @@
+import 'package:agorawebrtc/src/features/meeting/widgets/meeting_screen.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_project/src/features/meeting/widgets/meeting_screen.dart';
 
 /// {@template home_screen}
 /// HomeScreen widget — entry point for the meeting lobby.

@@ -58,6 +58,15 @@ Never _throwArguments() {
 
 Iterable<io.FileSystemEntity> _recursiveDirectories(io.Directory directory) sync* {
   const excludeFiles = <String>{'README.md', 'rename_project.dart'};
+  const excludeDirs = <String>{
+    'Pods',
+    '.pub-cache',
+    '.dart_tool',
+    'build',
+    '.gradle',
+    '.idea',
+    'node_modules',
+  };
   const includeExtensions = <String>{
     '.dart',
     '.yaml',
@@ -82,6 +91,7 @@ Iterable<io.FileSystemEntity> _recursiveDirectories(io.Directory directory) sync
       if (excludeFiles.contains(p.basename(e.path))) continue;
       yield e;
     } else if (e is io.Directory) {
+      if (excludeDirs.contains(p.basename(e.path))) continue;
       yield e;
       yield* _recursiveDirectories(e);
     }

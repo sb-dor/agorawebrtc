@@ -1,4 +1,4 @@
-import 'package:flutter_project/src/features/call/models/call_type.dart';
+import 'package:agorawebrtc/src/features/call/models/call_type.dart';
 
 /// Parameters passed from the meeting lobby to the call screen.
 class MeetingParams {

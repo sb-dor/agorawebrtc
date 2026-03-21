@@ -1,5 +1,5 @@
-import 'package:flutter_project/src/common/widget/common_header.dart';
-import 'package:flutter_project/src/common/widget/scaffold_padding.dart';
+import 'package:agorawebrtc/src/common/widget/common_header.dart';
+import 'package:agorawebrtc/src/common/widget/scaffold_padding.dart';
 import 'package:ui/ui.dart';
 
 /// {@template settings_screen}

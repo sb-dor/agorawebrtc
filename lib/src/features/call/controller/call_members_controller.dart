@@ -1,7 +1,8 @@
 import 'dart:async';
+
+import 'package:agorawebrtc/src/features/call/models/call_event.dart';
 import 'package:control/control.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_project/src/features/call/models/call_event.dart';
 
 @immutable
 sealed class CallMembersState {

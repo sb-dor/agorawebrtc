@@ -1,4 +1,4 @@
-package www.sbdor.template.flutter_project
+package www.sbdor.template.agorawebrtc
 
 import io.flutter.embedding.android.FlutterActivity
 

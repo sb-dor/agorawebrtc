@@ -1,14 +1,14 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:agorawebrtc/src/features/call/controller/call_controller.dart';
+import 'package:agorawebrtc/src/features/call/controller/call_media_controller.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/call_control_bar.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/call_top_bar.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/camera_off_tile.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/local_video_preview.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/participant_grid.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/waiting_view.dart';
+import 'package:agorawebrtc/src/features/call/widgets/call_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/src/features/call/controller/call_controller.dart';
-import 'package:flutter_project/src/features/call/controller/call_media_controller.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/call_control_bar.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/call_top_bar.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/camera_off_tile.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/local_video_preview.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/participant_grid.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/waiting_view.dart';
-import 'package:flutter_project/src/features/call/widgets/call_screen.dart';
 
 /// Full-screen video call layout.
 ///

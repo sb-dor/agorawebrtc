@@ -1,7 +1,7 @@
-import 'package:flutter/widgets.dart';
-import 'package:flutter_project/src/common/localization/generated/l10n.dart'
+import 'package:agorawebrtc/src/common/localization/generated/l10n.dart'
     as generated
     show GeneratedLocalization, AppLocalizationDelegate;
+import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
 /// Localization.

@@ -1,18 +1,19 @@
 import 'dart:math' as math;
 
+import 'package:agorawebrtc/src/common/constant/config.dart';
+import 'package:agorawebrtc/src/common/widget/scaffold_padding.dart';
+import 'package:agorawebrtc/src/features/authentication/widget/authentication_scope.dart';
+import 'package:agorawebrtc/src/features/call/models/call_type.dart';
+import 'package:agorawebrtc/src/features/call/widgets/call_screen.dart';
+import 'package:agorawebrtc/src/features/developer/widget/developer_button.dart';
+import 'package:agorawebrtc/src/features/meeting/controller/meeting_controller.dart';
+import 'package:agorawebrtc/src/features/meeting/data/token_repository.dart';
+import 'package:agorawebrtc/src/features/meeting/widgets/controllers/meeting_data_controller.dart';
+import 'package:agorawebrtc/src/features/meeting/widgets/lobby/meeting_config_warning.dart';
+import 'package:agorawebrtc/src/features/meeting/widgets/lobby/share_hint.dart';
 import 'package:control/control.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_project/src/common/constant/config.dart';
-import 'package:flutter_project/src/common/widget/scaffold_padding.dart';
-import 'package:flutter_project/src/features/authentication/widget/authentication_scope.dart';
-import 'package:flutter_project/src/features/call/models/call_type.dart';
-import 'package:flutter_project/src/features/call/widgets/call_screen.dart';
-import 'package:flutter_project/src/features/meeting/controller/meeting_controller.dart';
-import 'package:flutter_project/src/features/meeting/data/token_repository.dart';
-import 'package:flutter_project/src/features/meeting/widgets/controllers/meeting_data_controller.dart';
-import 'package:flutter_project/src/features/meeting/widgets/lobby/meeting_config_warning.dart';
-import 'package:flutter_project/src/features/meeting/widgets/lobby/share_hint.dart';
 
 /// Generates a random Google-Meet-style meeting code, e.g. "abc-defg-hij".
 String _generateMeetingCode() {
@@ -124,6 +125,7 @@ class _MeetingScreenState extends State<MeetingScreen> {
       appBar: AppBar(
         title: Text('Hi, ${user?.name ?? 'Guest'}'),
         actions: [
+          const DeveloperButton(),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Sign out',

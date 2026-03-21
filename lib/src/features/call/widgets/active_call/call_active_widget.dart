@@ -1,12 +1,12 @@
+import 'package:agorawebrtc/src/features/call/controller/call_controller.dart';
+import 'package:agorawebrtc/src/features/call/controller/call_media_controller.dart';
+import 'package:agorawebrtc/src/features/call/controller/call_members_controller.dart';
+import 'package:agorawebrtc/src/features/call/models/call_type.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/audio_call_view.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/video_call_view.dart';
+import 'package:agorawebrtc/src/features/call/widgets/call_screen.dart';
 import 'package:control/control.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/src/features/call/controller/call_controller.dart';
-import 'package:flutter_project/src/features/call/controller/call_media_controller.dart';
-import 'package:flutter_project/src/features/call/controller/call_members_controller.dart';
-import 'package:flutter_project/src/features/call/models/call_type.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/audio_call_view.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/video_call_view.dart';
-import 'package:flutter_project/src/features/call/widgets/call_screen.dart';
 
 /// Active call screen — renders either [VideoCallView] or [AudioCallView]
 /// based on the current call type, wiring state from all three controllers.

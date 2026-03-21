@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:agorawebrtc/src/features/call/data/call_repository.dart';
+import 'package:agorawebrtc/src/features/call/models/call_event.dart';
+import 'package:agorawebrtc/src/features/call/models/call_type.dart';
 import 'package:control/control.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_project/src/features/call/data/call_repository.dart';
-import 'package:flutter_project/src/features/call/models/call_event.dart';
-import 'package:flutter_project/src/features/call/models/call_type.dart';
 
 @immutable
 sealed class CallState {

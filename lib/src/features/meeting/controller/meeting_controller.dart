@@ -1,8 +1,8 @@
+import 'package:agorawebrtc/src/features/call/models/call_type.dart';
+import 'package:agorawebrtc/src/features/meeting/data/token_repository.dart';
+import 'package:agorawebrtc/src/features/meeting/models/meeting_params.dart';
 import 'package:control/control.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_project/src/features/call/models/call_type.dart';
-import 'package:flutter_project/src/features/meeting/data/token_repository.dart';
-import 'package:flutter_project/src/features/meeting/models/meeting_params.dart';
 
 @immutable
 sealed class MeetingState {

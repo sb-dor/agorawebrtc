@@ -1,5 +1,5 @@
+import 'package:agorawebrtc/src/common/util/error_util/error_util.dart';
 import 'package:control/control.dart';
-import 'package:flutter_project/src/common/util/error_util/error_util.dart';
 import 'package:l/l.dart';
 
 /// Observer for [Controller], react to changes in any controller.

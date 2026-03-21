@@ -1,10 +1,10 @@
+import 'package:agorawebrtc/src/features/authentication/controller/authentication_controller.dart';
+import 'package:agorawebrtc/src/features/authentication/data/authentication_repository.dart';
+import 'package:agorawebrtc/src/features/initialization/models/dependencies.dart';
+import 'package:agorawebrtc/src/features/initialization/widget/app.dart';
+import 'package:agorawebrtc/src/features/initialization/widget/dependencies_scope.dart';
+import 'package:agorawebrtc/src/features/settings/widget/settings_scope.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/src/features/authentication/controller/authentication_controller.dart';
-import 'package:flutter_project/src/features/authentication/data/authentication_repository.dart';
-import 'package:flutter_project/src/features/initialization/models/dependencies.dart';
-import 'package:flutter_project/src/features/initialization/widget/app.dart';
-import 'package:flutter_project/src/features/initialization/widget/dependencies_scope.dart';
-import 'package:flutter_project/src/features/settings/widget/settings_scope.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:octopus/octopus.dart';
 

@@ -1,6 +1,6 @@
-import 'package:flutter_project/src/common/router/routes.dart';
-import 'package:flutter_project/src/common/widget/scaffold_padding.dart';
-import 'package:flutter_project/src/features/authentication/widget/log_out_button.dart';
+import 'package:agorawebrtc/src/common/router/routes.dart';
+import 'package:agorawebrtc/src/common/widget/scaffold_padding.dart';
+import 'package:agorawebrtc/src/features/authentication/widget/log_out_button.dart';
 import 'package:octopus/octopus.dart';
 import 'package:ui/ui.dart';
 

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_project/src/common/util/error_util/error_util.dart';
+import 'package:agorawebrtc/src/common/util/error_util/error_util.dart';
 import 'package:l/l.dart';
 import 'package:platform_info/platform_info.dart';
 

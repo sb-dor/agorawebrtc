@@ -1,8 +1,8 @@
+import 'package:agorawebrtc/src/features/call/controller/call_controller.dart';
+import 'package:agorawebrtc/src/features/call/controller/call_media_controller.dart';
+import 'package:agorawebrtc/src/features/call/models/call_type.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/call_control_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/src/features/call/controller/call_controller.dart';
-import 'package:flutter_project/src/features/call/controller/call_media_controller.dart';
-import 'package:flutter_project/src/features/call/models/call_type.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/call_control_button.dart';
 
 /// Bottom bar with mute, camera, flip and end-call controls.
 ///

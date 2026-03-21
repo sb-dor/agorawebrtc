@@ -1,14 +1,14 @@
 import 'dart:async';
 
+import 'package:agorawebrtc/src/common/constant/pubspec.yaml.g.dart';
+import 'package:agorawebrtc/src/common/controller/controller_observer.dart';
+import 'package:agorawebrtc/src/common/model/app_metadata.dart';
+import 'package:agorawebrtc/src/common/util/screen_util.dart';
+import 'package:agorawebrtc/src/features/authentication/controller/authentication_controller.dart';
+import 'package:agorawebrtc/src/features/authentication/data/authentication_repository.dart';
+import 'package:agorawebrtc/src/features/initialization/data/platform/platform_initialization.dart';
+import 'package:agorawebrtc/src/features/initialization/models/dependencies.dart';
 import 'package:control/control.dart';
-import 'package:flutter_project/src/common/constant/pubspec.yaml.g.dart';
-import 'package:flutter_project/src/common/controller/controller_observer.dart';
-import 'package:flutter_project/src/common/model/app_metadata.dart';
-import 'package:flutter_project/src/common/util/screen_util.dart';
-import 'package:flutter_project/src/features/authentication/controller/authentication_controller.dart';
-import 'package:flutter_project/src/features/authentication/data/authentication_repository.dart';
-import 'package:flutter_project/src/features/initialization/data/platform/platform_initialization.dart';
-import 'package:flutter_project/src/features/initialization/models/dependencies.dart';
 import 'package:l/l.dart';
 import 'package:platform_info/platform_info.dart';
 

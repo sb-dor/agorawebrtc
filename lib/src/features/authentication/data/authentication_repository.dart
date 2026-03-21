@@ -1,4 +1,4 @@
-import 'package:flutter_project/src/features/authentication/model/user.dart';
+import 'package:agorawebrtc/src/features/authentication/model/user.dart';
 
 abstract interface class IAuthenticationRepository {}
 

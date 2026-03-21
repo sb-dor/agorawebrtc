@@ -1,6 +1,6 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/camera_off_tile.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/camera_off_tile.dart';
 
 /// A single participant tile in the grid — shows video feed or camera-off placeholder.
 class ParticipantTile extends StatelessWidget {

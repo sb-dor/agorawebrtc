@@ -1,7 +1,7 @@
+import 'package:agorawebrtc/src/common/localization/localization.dart';
+import 'package:agorawebrtc/src/features/authentication/widget/authentication_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_project/src/common/localization/localization.dart';
-import 'package:flutter_project/src/features/authentication/widget/authentication_scope.dart';
 
 /// {@template log_out_button}
 /// LogOutButton widget

@@ -1,11 +1,11 @@
 import 'dart:collection';
 
+import 'package:agorawebrtc/src/common/widget/history_button.dart';
+import 'package:agorawebrtc/src/features/account/widget/profile_icon_button.dart';
+import 'package:agorawebrtc/src/features/authentication/widget/log_out_button.dart';
+import 'package:agorawebrtc/src/features/developer/widget/developer_button.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_project/src/common/widget/history_button.dart';
-import 'package:flutter_project/src/features/account/widget/profile_icon_button.dart';
-import 'package:flutter_project/src/features/authentication/widget/log_out_button.dart';
-import 'package:flutter_project/src/features/developer/widget/developer_button.dart';
 
 class CommonActions extends ListBase<Widget> {
   CommonActions([List<Widget>? actions])

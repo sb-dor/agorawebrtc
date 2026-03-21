@@ -1,7 +1,7 @@
+import 'package:agorawebrtc/src/features/authentication/controller/authentication_controller.dart';
+import 'package:agorawebrtc/src/features/authentication/model/user.dart';
+import 'package:agorawebrtc/src/features/initialization/models/dependencies.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_project/src/features/authentication/controller/authentication_controller.dart';
-import 'package:flutter_project/src/features/authentication/model/user.dart';
-import 'package:flutter_project/src/features/initialization/models/dependencies.dart';
 
 /// {@template authentication_scope}
 /// AuthenticationScope widget.

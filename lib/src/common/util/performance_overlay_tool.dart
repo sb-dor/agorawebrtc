@@ -1,5 +1,5 @@
+import 'package:agorawebrtc/src/common/util/screen_util.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_project/src/common/util/screen_util.dart';
 import 'package:ui/ui.dart';
 
 class PerformanceOverlayTool extends StatefulWidget {

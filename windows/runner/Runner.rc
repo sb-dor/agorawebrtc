@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.sbdor" "\0"
-            VALUE "FileDescription", "flutter_project" "\0"
+            VALUE "FileDescription", "agorawebrtc" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "flutter_project" "\0"
+            VALUE "InternalName", "agorawebrtc" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.sbdor. All rights reserved." "\0"
-            VALUE "OriginalFilename", "flutter_project.exe" "\0"
-            VALUE "ProductName", "flutter_project" "\0"
+            VALUE "OriginalFilename", "agorawebrtc.exe" "\0"
+            VALUE "ProductName", "agorawebrtc" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

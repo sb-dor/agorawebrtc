@@ -1,6 +1,6 @@
+import 'package:agorawebrtc/src/features/call/data/call_repository.dart';
 import 'package:control/control.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_project/src/features/call/data/call_repository.dart';
 
 /// Local media state — mute and camera flags.
 @immutable

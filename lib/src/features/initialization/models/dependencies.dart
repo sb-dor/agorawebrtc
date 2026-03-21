@@ -1,7 +1,7 @@
+import 'package:agorawebrtc/src/common/model/app_metadata.dart';
+import 'package:agorawebrtc/src/features/authentication/controller/authentication_controller.dart';
+import 'package:agorawebrtc/src/features/initialization/widget/dependencies_scope.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_project/src/common/model/app_metadata.dart';
-import 'package:flutter_project/src/features/authentication/controller/authentication_controller.dart';
-import 'package:flutter_project/src/features/initialization/widget/dependencies_scope.dart';
 
 /// {@template dependencies}
 /// Application dependencies.

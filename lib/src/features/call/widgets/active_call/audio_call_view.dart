@@ -1,9 +1,9 @@
+import 'package:agorawebrtc/src/features/call/controller/call_controller.dart';
+import 'package:agorawebrtc/src/features/call/controller/call_media_controller.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/call_control_bar.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/call_top_bar.dart';
+import 'package:agorawebrtc/src/features/call/widgets/active_call/participant_avatars.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/src/features/call/controller/call_controller.dart';
-import 'package:flutter_project/src/features/call/controller/call_media_controller.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/call_control_bar.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/call_top_bar.dart';
-import 'package:flutter_project/src/features/call/widgets/active_call/participant_avatars.dart';
 
 /// Full-screen audio-only call layout with participant avatars.
 class AudioCallView extends StatelessWidget {

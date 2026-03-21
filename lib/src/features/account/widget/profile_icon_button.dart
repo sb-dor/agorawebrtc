@@ -1,7 +1,7 @@
+import 'package:agorawebrtc/src/common/localization/localization.dart';
+import 'package:agorawebrtc/src/common/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_project/src/common/localization/localization.dart';
-import 'package:flutter_project/src/common/router/routes.dart';
 import 'package:octopus/octopus.dart';
 
 /// {@template profile_icon_button}

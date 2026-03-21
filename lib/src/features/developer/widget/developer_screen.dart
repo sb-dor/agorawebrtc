@@ -1,8 +1,8 @@
+import 'package:agorawebrtc/src/common/constant/pubspec.yaml.g.dart';
+import 'package:agorawebrtc/src/common/localization/localization.dart';
+import 'package:agorawebrtc/src/common/widget/scaffold_padding.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_project/src/common/constant/pubspec.yaml.g.dart';
-import 'package:flutter_project/src/common/localization/localization.dart';
-import 'package:flutter_project/src/common/widget/scaffold_padding.dart';
 import 'package:url_launcher/url_launcher_string.dart' as url_launcher;
 
 /// {@template developer_screen}

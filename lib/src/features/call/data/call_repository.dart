@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:agorawebrtc/src/features/call/models/call_event.dart';
+import 'package:agorawebrtc/src/features/call/models/call_type.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_project/src/features/call/models/call_event.dart';
-import 'package:flutter_project/src/features/call/models/call_type.dart';
 import 'package:l/l.dart';
 
 /// Contract for managing Agora RTC engine operations.

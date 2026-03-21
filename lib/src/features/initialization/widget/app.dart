@@ -1,12 +1,12 @@
+import 'package:agorawebrtc/src/common/constant/config.dart';
+import 'package:agorawebrtc/src/common/localization/localization.dart';
+import 'package:agorawebrtc/src/common/router/router_state_mixin.dart';
+import 'package:agorawebrtc/src/common/util/performance_overlay_tool.dart';
+import 'package:agorawebrtc/src/common/widget/window_scope.dart';
+import 'package:agorawebrtc/src/features/authentication/widget/authentication_scope.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_project/src/common/constant/config.dart';
-import 'package:flutter_project/src/common/localization/localization.dart';
-import 'package:flutter_project/src/common/router/router_state_mixin.dart';
-import 'package:flutter_project/src/common/util/performance_overlay_tool.dart';
-import 'package:flutter_project/src/common/widget/window_scope.dart';
-import 'package:flutter_project/src/features/authentication/widget/authentication_scope.dart';
 import 'package:octopus/octopus.dart';
 
 /// {@template app}
