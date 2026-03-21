@@ -1,3 +1,19 @@
+## Mobile Screenshots
+
+<p float="left">
+  <img src="https://raw.githubusercontent.com/sb-dor/agorawebrtc/refs/heads/main/github_assets/mobile.png" alt="Screenshot 1" width="200" />
+</p>
+
+## Web Screenshots
+
+<p float="left">
+  <img src="https://raw.githubusercontent.com/sb-dor/agorawebrtc/refs/heads/main/github_assets/multi_device.png" alt="Screenshot WEB 1" width="820" />
+</p>
+
+<p float="left">
+  <img src="https://raw.githubusercontent.com/sb-dor/agorawebrtc/refs/heads/main/github_assets/mac.png" alt="Screenshot WEB 2" width="820" />
+</p>
+
 # Agora Call — Flutter Video & Audio Calling App
 
 A multi-party video and audio calling app built with Flutter and
@@ -20,7 +36,7 @@ the code can join.
 1. Log in to the [Agora Console](https://console.agora.io).
 2. Create a new project (or open an existing one).
 3. Copy the **App ID** from the project settings page.
-4. *(Optional)* To test without a token server, go to **Temporary Token** in the console,
+4. _(Optional)_ To test without a token server, go to **Temporary Token** in the console,
    enter a channel name, and generate a **Temp Token**. Temp tokens expire after 24 hours.
 
 ---
@@ -37,11 +53,11 @@ Open `config/production.json` and fill in your credentials:
 }
 ```
 
-| Field | Purpose |
-|---|---|
-| `AGORA_APP_ID` | Required. Your Agora project App ID. |
-| `AGORA_APP_CERTIFICATE` | Optional. Enables client-side token generation. Leave empty for App ID–only mode. |
-| `AGORA_TEMP_TOKEN` | Optional. A pre-generated token for quick testing. Takes priority over certificate generation. |
+| Field                   | Purpose                                                                                        |
+| ----------------------- | ---------------------------------------------------------------------------------------------- |
+| `AGORA_APP_ID`          | Required. Your Agora project App ID.                                                           |
+| `AGORA_APP_CERTIFICATE` | Optional. Enables client-side token generation. Leave empty for App ID–only mode.              |
+| `AGORA_TEMP_TOKEN`      | Optional. A pre-generated token for quick testing. Takes priority over certificate generation. |
 
 > **Note:** New Agora projects default to **App ID–only** mode. If you leave both
 > `AGORA_APP_CERTIFICATE` and `AGORA_TEMP_TOKEN` empty the app joins without a token,
@@ -107,12 +123,12 @@ Or use the pre-configured VSCode launch configurations in `.vscode/launch.json`.
 
 ## 6. In-call controls
 
-| Button | Action |
-|--------|--------|
-| Mic    | Mute / unmute your microphone |
-| Camera | Turn camera on / off (video calls only) |
+| Button | Action                                             |
+| ------ | -------------------------------------------------- |
+| Mic    | Mute / unmute your microphone                      |
+| Camera | Turn camera on / off (video calls only)            |
 | Flip   | Switch between front and rear camera (native only) |
-| End    | Leave the call and return to the lobby |
+| End    | Leave the call and return to the lobby             |
 
 ---
 
@@ -177,13 +193,13 @@ into `MeetingController` in `MeetingScreen`.
 
 Permissions are pre-configured for all supported platforms:
 
-| Platform | Configuration |
-|----------|--------------|
-| Android  | `CAMERA`, `RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS`, `INTERNET` in `AndroidManifest.xml` |
-| iOS      | `NSCameraUsageDescription`, `NSMicrophoneUsageDescription` in `ios/Runner/Info.plist` |
-| macOS    | Camera + microphone sandbox entitlements in `macos/Runner/*.entitlements` and `Info.plist` |
-| Web      | Browser prompts natively when media is first accessed. Must run on `localhost` or `https://` |
-| Linux / Windows | Granted at OS level — no runtime request required |
+| Platform        | Configuration                                                                                |
+| --------------- | -------------------------------------------------------------------------------------------- |
+| Android         | `CAMERA`, `RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS`, `INTERNET` in `AndroidManifest.xml`       |
+| iOS             | `NSCameraUsageDescription`, `NSMicrophoneUsageDescription` in `ios/Runner/Info.plist`        |
+| macOS           | Camera + microphone sandbox entitlements in `macos/Runner/*.entitlements` and `Info.plist`   |
+| Web             | Browser prompts natively when media is first accessed. Must run on `localhost` or `https://` |
+| Linux / Windows | Granted at OS level — no runtime request required                                            |
 
 ---
 
@@ -192,19 +208,3 @@ Permissions are pre-configured for all supported platforms:
 ```bash
 dart run tool/dart/rename_project.dart --name="project" --organization="dev.flutter" --description="My project description"
 ```
-
-
-## Mobile Screenshots
-<p float="left">
-  <img src="https://raw.githubusercontent.com/sb-dor/agorawebrtc/refs/heads/main/github_assets/mobile.png" alt="Screenshot 1" width="200" />
-</p>
-
-
-## Web Screenshots
-<p float="left">
-  <img src="https://raw.githubusercontent.com/sb-dor/agorawebrtc/refs/heads/main/github_assets/multi_device.png" alt="Screenshot WEB 1" width="820" />
-</p>
-
-<p float="left">
-  <img src="https://raw.githubusercontent.com/sb-dor/agorawebrtc/refs/heads/main/github_assets/mac.png" alt="Screenshot WEB 2" width="820" />
-</p>
