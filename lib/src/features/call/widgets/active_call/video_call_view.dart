@@ -62,6 +62,10 @@ class _VideoCallViewState extends State<VideoCallView> {
     if (_isSwapped && widget.remoteUids.isEmpty) {
       _isSwapped = false;
     }
+    // If local camera was turned off while showing self full-screen, swap back to remote.
+    if (_isSwapped && !oldWidget.mediaState.isCameraOff && widget.mediaState.isCameraOff) {
+      _isSwapped = false;
+    }
   }
 
   void _toggleSwap() => setState(() => _isSwapped = !_isSwapped);
