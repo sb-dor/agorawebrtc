@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_project/src/feature/authentication/model/user.dart';
+import 'package:flutter_project/src/features/authentication/model/user.dart';
 import 'package:octopus/octopus.dart';
 
 /// A router guard that checks if the user is authenticated.

@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart' show State, StatefulWidget, ValueNotifier;
 import 'package:flutter_project/src/common/router/authentication_guard.dart';
 import 'package:flutter_project/src/common/router/routes.dart';
-import 'package:flutter_project/src/feature/initialization/models/dependencies.dart';
+import 'package:flutter_project/src/features/initialization/models/dependencies.dart';
 import 'package:octopus/octopus.dart';
 
 mixin RouterStateMixin<T extends StatefulWidget> on State<T> {
