@@ -98,9 +98,10 @@ final class Call$ErrorState extends CallState {
 final class CallController extends StateController<CallState> with SequentialControllerHandler {
   CallController({
     required ICallRepository callRepository,
+    required Stream<CallEvent> eventStream,
     super.initialState = const CallState.idle(),
   }) : _callRepository = callRepository {
-    _eventsSubscription = _callRepository.onCallEvents().listen(_onCallEvent);
+    _eventsSubscription = eventStream.listen(_onCallEvent);
   }
 
   final ICallRepository _callRepository;

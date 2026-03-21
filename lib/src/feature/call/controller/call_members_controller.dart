@@ -53,13 +53,11 @@ final class CallMembers$ActiveState extends CallMembersState {
 /// lifecycle (join/leave) or media controls.
 final class CallMembersController extends StateController<CallMembersState>
     with SequentialControllerHandler {
-  CallMembersController({required ICallRepository callRepository})
-    : _callRepository = callRepository,
-      super(initialState: const CallMembersState.idle()) {
-    _subscription = _callRepository.onCallEvents().listen(_onEvent);
+  CallMembersController({required final Stream<CallEvent> eventStream})
+    : super(initialState: const CallMembersState.idle()) {
+    _subscription = eventStream.listen(_onEvent);
   }
 
-  final ICallRepository _callRepository;
   StreamSubscription<CallEvent>? _subscription;
 
   void _onEvent(CallEvent event) {

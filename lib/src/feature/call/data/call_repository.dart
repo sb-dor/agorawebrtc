@@ -34,10 +34,11 @@ final class CallRepositoryImpl implements ICallRepository {
   @override
   Stream<CallEvent> onCallEvents() {
     // ignore: close_sinks — closed implicitly when the engine handler is unregistered
-    final streamController = StreamController<CallEvent>();
+    final streamController = StreamController<CallEvent>.broadcast();
 
     Future<void> initialize() async {
       if (streamController.isClosed) return;
+      l.d('steamcontroller was initialized only once');
       _engine.registerEventHandler(
         RtcEngineEventHandler(
           onJoinChannelSuccess: (connection, elapsed) {

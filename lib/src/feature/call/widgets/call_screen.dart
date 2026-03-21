@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:control/control.dart';
 import 'package:flutter/foundation.dart';
@@ -7,6 +9,7 @@ import 'package:flutter_project/src/feature/call/controller/call_controller.dart
 import 'package:flutter_project/src/feature/call/controller/call_media_controller.dart';
 import 'package:flutter_project/src/feature/call/controller/call_members_controller.dart';
 import 'package:flutter_project/src/feature/call/data/call_repository.dart';
+import 'package:flutter_project/src/feature/call/models/call_event.dart';
 import 'package:flutter_project/src/feature/call/models/call_type.dart';
 import 'package:flutter_project/src/feature/call/widgets/active_call/call_active_widget.dart';
 import 'package:flutter_project/src/feature/meeting/models/meeting_params.dart';
@@ -46,6 +49,7 @@ class CallScreenState extends State<CallScreen> {
   late final CallMediaController callMediaController;
   late final CallMembersController callMembersController;
   late final RtcEngine rtcEngine;
+  late final Stream<CallEvent> _callEventStream;
 
   bool _isInitializing = true;
   bool _initialized = false;
@@ -93,9 +97,10 @@ class CallScreenState extends State<CallScreen> {
     }
 
     _repository = CallRepositoryImpl(rtcEngine);
-    callController = CallController(callRepository: _repository);
+    _callEventStream = _repository.onCallEvents();
+    callController = CallController(callRepository: _repository, eventStream: _callEventStream);
+    callMembersController = CallMembersController(eventStream: _callEventStream);
     callMediaController = CallMediaController(callRepository: _repository);
-    callMembersController = CallMembersController(callRepository: _repository);
 
     callController
       ..addListener(_onCallStateChanged)
