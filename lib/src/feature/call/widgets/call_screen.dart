@@ -10,6 +10,7 @@ import 'package:flutter_project/src/feature/call/data/call_repository.dart';
 import 'package:flutter_project/src/feature/call/models/call_type.dart';
 import 'package:flutter_project/src/feature/call/widgets/active_call/call_active_widget.dart';
 import 'package:flutter_project/src/feature/meeting/models/meeting_params.dart';
+import 'package:l/l.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 /// Inherited widget that exposes [CallScreenState] to the active-call subtree.
@@ -82,6 +83,9 @@ class CallScreenState extends State<CallScreen> {
     }
 
     rtcEngine = createAgoraRtcEngine();
+
+    /// agoraAppOd exists
+    l.d('DEBUG appId: "${Config.agoraAppId}"');
     await rtcEngine.initialize(const RtcEngineContext(appId: Config.agoraAppId));
 
     if (!mounted) {

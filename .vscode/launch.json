@@ -47,6 +47,20 @@
         "--device-id=web-server",
       ],
       "env": {}
+    },
+    {
+      "name": "Run DEV Web Chrome (Debug)",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "--dart-define-from-file=config/production.json",
+        "--device-id=chrome",
+        "--web-hostname=localhost",
+        "--web-port=8080",
+      ],
+      "env": {}
     }
   ]
 }
