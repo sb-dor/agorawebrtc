@@ -1,13 +1,9 @@
 import 'dart:async';
 
 import 'package:control/control.dart';
-import 'package:flutter_project/src/common/constant/config.dart';
 import 'package:flutter_project/src/common/constant/pubspec.yaml.g.dart';
 import 'package:flutter_project/src/common/controller/controller_observer.dart';
 import 'package:flutter_project/src/common/model/app_metadata.dart';
-import 'package:flutter_project/src/common/util/api_client.dart';
-import 'package:flutter_project/src/common/util/middleware/authentication_interceptor.dart';
-import 'package:flutter_project/src/common/util/middleware/logger_mw.dart';
 import 'package:flutter_project/src/common/util/screen_util.dart';
 import 'package:flutter_project/src/features/authentication/controller/authentication_controller.dart';
 import 'package:flutter_project/src/features/authentication/data/authentication_repository.dart';
@@ -15,7 +11,6 @@ import 'package:flutter_project/src/features/initialization/data/platform/platfo
 import 'package:flutter_project/src/features/initialization/models/dependencies.dart';
 import 'package:l/l.dart';
 import 'package:platform_info/platform_info.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Initializes the app and returns a [Dependencies] object
 Future<Dependencies> $initializeDependencies({
@@ -66,32 +61,7 @@ final Map<String, _InitializationStep> _initializationSteps = <String, _Initiali
   'Log app open': (_) {},
   'Get remote config': (_) {},
   'Restore settings': (_) {},
-  'Initialize shared preferences': (dependencies) async =>
-      dependencies.sharedPreferences = await SharedPreferences.getInstance(),
-  'API Client': (dependencies) => dependencies.apiClient = ApiClient(
-    baseUrl: Config.apiBaseUrl,
-    middlewares: [
-      //
-      AuthenticationInterceptor(
-        authenticationHeaders: AuthenticationHeaders(
-          sharedPreferences: dependencies.sharedPreferences,
-        ),
-      ).call,
-      const ApiClient$LoggerMiddleware(logRequest: false, logResponse: true, logError: true).call,
-      // dedupe interceptor
-      // authentification interceptor
-      // save all requests to database
-      // sentry interceptor
-      // cache interceptor
-      // retry interceptor
-    ],
-  ),
-  'Prepare authentication controller': (dependencies) =>
-      dependencies.authenticationController = AuthenticationController(
-        repository: AuthenticationRepositoryImpl(
-          sharedPreferences: dependencies.sharedPreferences,
-          apiClient: dependencies.apiClient,
-        ),
-      ),
+  'Prepare authentication controller': (dependencies) => dependencies.authenticationController =
+      AuthenticationController(repository: AuthenticationRepositoryImpl()),
   // The 'Shrink database' step will only be included in non-release build
 };

@@ -1,9 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_project/src/common/model/app_metadata.dart';
-import 'package:flutter_project/src/common/util/api_client.dart';
 import 'package:flutter_project/src/features/authentication/controller/authentication_controller.dart';
 import 'package:flutter_project/src/features/initialization/widget/dependencies_scope.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// {@template dependencies}
 /// Application dependencies.
@@ -23,12 +21,6 @@ class Dependencies {
 
   /// App metadata
   late final AppMetadata metadata;
-
-  /// Shared preferences
-  late final SharedPreferences sharedPreferences;
-
-  /// API Client
-  late final ApiClient apiClient;
 
   /// Authentication controller
   late final AuthenticationController authenticationController;
