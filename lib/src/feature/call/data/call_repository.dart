@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_project/src/feature/call/models/call_event.dart';
 import 'package:flutter_project/src/feature/call/models/call_type.dart';
 import 'package:l/l.dart';
@@ -38,7 +39,6 @@ final class CallRepositoryImpl implements ICallRepository {
 
     Future<void> initialize() async {
       if (streamController.isClosed) return;
-      l.d('steamcontroller was initialized only once');
       _engine.registerEventHandler(
         RtcEngineEventHandler(
           onJoinChannelSuccess: (connection, elapsed) {
@@ -49,6 +49,12 @@ final class CallRepositoryImpl implements ICallRepository {
           },
           onUserOffline: (connection, remoteUid, reason) {
             streamController.add(CallEvent$UserLeft(remoteUid));
+          },
+          onUserMuteAudio: (connection, remoteUid, muted) {
+            streamController.add(CallEvent$UserMutedAudio(remoteUid, muted));
+          },
+          onUserMuteVideo: (connection, remoteUid, muted) {
+            streamController.add(CallEvent$UserMutedVideo(remoteUid, muted));
           },
           onError: (err, msg) {
             l.e('error $err');
@@ -85,11 +91,13 @@ final class CallRepositoryImpl implements ICallRepository {
       autoSubscribeAudio: true,
       autoSubscribeVideo: callType == CallType.video,
     );
-    if (callType == CallType.video) {
-      await _engine.enableVideo();
-      await _engine.startPreview();
-    } else {
-      await _engine.disableVideo();
+    if (!kIsWeb) {
+      if (callType == CallType.video) {
+        await _engine.enableVideo();
+        await _engine.startPreview();
+      } else {
+        await _engine.disableVideo();
+      }
     }
     await _engine.joinChannel(
       token: token ?? '',
@@ -108,13 +116,17 @@ final class CallRepositoryImpl implements ICallRepository {
   @override
   Future<void> toggleCamera(bool disable) async {
     await _engine.muteLocalVideoStream(disable);
-    if (disable) {
-      await _engine.stopPreview();
-    } else {
-      await _engine.startPreview();
+    if (!kIsWeb) {
+      if (disable) {
+        await _engine.stopPreview();
+      } else {
+        await _engine.startPreview();
+      }
     }
   }
 
   @override
-  Future<void> switchCamera() => _engine.switchCamera();
+  Future<void> switchCamera() async {
+    if (!kIsWeb) await _engine.switchCamera();
+  }
 }

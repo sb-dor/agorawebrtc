@@ -40,3 +40,19 @@ final class CallEvent$Error extends CallEvent {
 
   final String message;
 }
+
+/// Fired when a remote user mutes or unmutes their microphone.
+final class CallEvent$UserMutedAudio extends CallEvent {
+  const CallEvent$UserMutedAudio(this.uid, this.muted);
+
+  final int uid;
+  final bool muted;
+}
+
+/// Fired when a remote user stops or resumes publishing their video stream.
+final class CallEvent$UserMutedVideo extends CallEvent {
+  const CallEvent$UserMutedVideo(this.uid, this.muted);
+
+  final int uid;
+  final bool muted;
+}

@@ -14,6 +14,7 @@ class AudioCallView extends StatelessWidget {
     required this.mediaState,
     required this.callController,
     required this.mediaController,
+    required this.remoteMutedUids,
   });
 
   final Call$ConnectedState callState;
@@ -21,6 +22,9 @@ class AudioCallView extends StatelessWidget {
   final CallMediaState mediaState;
   final CallController callController;
   final CallMediaController mediaController;
+
+  /// UIDs of remote participants who have muted their microphone.
+  final Set<int> remoteMutedUids;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -33,7 +37,7 @@ class AudioCallView extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ParticipantAvatars(remoteUids: remoteUids),
+                ParticipantAvatars(remoteUids: remoteUids, mutedUids: remoteMutedUids),
                 const SizedBox(height: 24),
                 Text(
                   callState.channelName,

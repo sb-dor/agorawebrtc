@@ -11,6 +11,7 @@ class ParticipantTile extends StatelessWidget {
     required this.engine,
     required this.isLocal,
     required this.cameraOff,
+    required this.audioMuted,
   });
 
   final int uid;
@@ -18,6 +19,7 @@ class ParticipantTile extends StatelessWidget {
   final RtcEngine engine;
   final bool isLocal;
   final bool cameraOff;
+  final bool audioMuted;
 
   @override
   Widget build(BuildContext context) => Stack(
@@ -35,6 +37,21 @@ class ParticipantTile extends StatelessWidget {
             rtcEngine: engine,
             canvas: VideoCanvas(uid: uid),
             connection: RtcConnection(channelId: channelName),
+          ),
+        ),
+
+      // Mic-off icon overlay — top-right corner
+      if (audioMuted)
+        Positioned(
+          top: 6,
+          right: 6,
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Colors.black54,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Icon(Icons.mic_off, color: Colors.white, size: 16),
           ),
         ),
 

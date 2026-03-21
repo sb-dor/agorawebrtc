@@ -14,12 +14,22 @@ class ParticipantGrid extends StatelessWidget {
     required this.channelName,
     required this.engine,
     required this.isCameraOff,
+    required this.remoteMutedAudio,
+    required this.remoteCameraOff,
   });
 
   final List<int> remoteUids;
   final String channelName;
   final RtcEngine engine;
+
+  /// Whether the local user has turned their camera off.
   final bool isCameraOff;
+
+  /// uid → true when that remote user has muted their microphone.
+  final Map<int, bool> remoteMutedAudio;
+
+  /// uid → true when that remote user has turned their camera off.
+  final Map<int, bool> remoteCameraOff;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +64,8 @@ class ParticipantGrid extends StatelessWidget {
               channelName: channelName,
               engine: engine,
               isLocal: isLocal,
-              cameraOff: isLocal && isCameraOff,
+              cameraOff: isLocal ? isCameraOff : (remoteCameraOff[uid] ?? false),
+              audioMuted: !isLocal && (remoteMutedAudio[uid] ?? false),
             );
           },
         );

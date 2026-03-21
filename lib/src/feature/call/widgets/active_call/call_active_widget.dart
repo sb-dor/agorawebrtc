@@ -31,9 +31,11 @@ class _CallActiveWidgetState extends State<CallActiveWidget> {
       return StateConsumer<CallMembersController, CallMembersState>(
         controller: _membersController,
         builder: (context, membersState, _) {
-          final remoteUids = membersState is CallMembers$ActiveState
-              ? membersState.remoteUids
-              : const <int>[];
+          final activeMembers = membersState is CallMembers$ActiveState ? membersState : null;
+          final remoteUids = activeMembers?.remoteUids ?? const <int>[];
+          final remoteMutedAudio = activeMembers?.remoteMutedAudio ?? const <int, bool>{};
+          final remoteCameraOff = activeMembers?.remoteCameraOff ?? const <int, bool>{};
+
           return StateConsumer<CallMediaController, CallMediaState>(
             controller: _mediaController,
             builder: (context, mediaState, _) {
@@ -44,6 +46,8 @@ class _CallActiveWidgetState extends State<CallActiveWidget> {
                   mediaState: mediaState,
                   callController: _callController,
                   mediaController: _mediaController,
+                  remoteMutedAudio: remoteMutedAudio,
+                  remoteCameraOff: remoteCameraOff,
                 );
               }
               return AudioCallView(
@@ -52,6 +56,10 @@ class _CallActiveWidgetState extends State<CallActiveWidget> {
                 mediaState: mediaState,
                 callController: _callController,
                 mediaController: _mediaController,
+                remoteMutedUids: remoteMutedAudio.entries
+                    .where((e) => e.value)
+                    .map((e) => e.key)
+                    .toSet(),
               );
             },
           );

@@ -134,6 +134,7 @@ final class CallController extends StateController<CallState> with SequentialCon
         onError('Error: $message', StackTrace.current);
         setState(CallState.error(message));
       case CallEvent$UserJoined() || CallEvent$UserLeft():
+      case CallEvent$UserMutedAudio() || CallEvent$UserMutedVideo():
         break; // handled by CallMembersController
     }
   }

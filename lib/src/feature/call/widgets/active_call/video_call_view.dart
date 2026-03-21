@@ -4,6 +4,7 @@ import 'package:flutter_project/src/feature/call/controller/call_controller.dart
 import 'package:flutter_project/src/feature/call/controller/call_media_controller.dart';
 import 'package:flutter_project/src/feature/call/widgets/active_call/call_control_bar.dart';
 import 'package:flutter_project/src/feature/call/widgets/active_call/call_top_bar.dart';
+import 'package:flutter_project/src/feature/call/widgets/active_call/camera_off_tile.dart';
 import 'package:flutter_project/src/feature/call/widgets/active_call/local_video_preview.dart';
 import 'package:flutter_project/src/feature/call/widgets/active_call/participant_grid.dart';
 import 'package:flutter_project/src/feature/call/widgets/active_call/waiting_view.dart';
@@ -22,6 +23,8 @@ class VideoCallView extends StatefulWidget {
     required this.mediaState,
     required this.callController,
     required this.mediaController,
+    required this.remoteMutedAudio,
+    required this.remoteCameraOff,
   });
 
   final Call$ConnectedState callState;
@@ -29,6 +32,12 @@ class VideoCallView extends StatefulWidget {
   final CallMediaState mediaState;
   final CallController callController;
   final CallMediaController mediaController;
+
+  /// uid → true when that remote user has muted their microphone.
+  final Map<int, bool> remoteMutedAudio;
+
+  /// uid → true when that remote user has turned their camera off.
+  final Map<int, bool> remoteCameraOff;
 
   @override
   State<VideoCallView> createState() => _VideoCallViewState();
@@ -57,6 +66,42 @@ class _VideoCallViewState extends State<VideoCallView> {
 
   void _toggleSwap() => setState(() => _isSwapped = !_isSwapped);
 
+  /// Wraps an [AgoraVideoView] for a remote user, adding camera-off and
+  /// mic-off overlays based on that user's current media state.
+  Widget _remoteView(int uid) {
+    final cameraOff = widget.remoteCameraOff[uid] ?? false;
+    final audioMuted = widget.remoteMutedAudio[uid] ?? false;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        if (cameraOff)
+          CameraOffTile(label: 'U${uid % 1000}')
+        else
+          AgoraVideoView(
+            controller: VideoViewController.remote(
+              rtcEngine: _rtcEngine,
+              canvas: VideoCanvas(uid: uid),
+              connection: RtcConnection(channelId: widget.callState.channelName),
+            ),
+          ),
+        if (audioMuted)
+          Positioned(
+            top: 6,
+            right: 6,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(Icons.mic_off, color: Colors.white, size: 16),
+            ),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final remoteCount = widget.remoteUids.length;
@@ -77,6 +122,8 @@ class _VideoCallViewState extends State<VideoCallView> {
                   channelName: widget.callState.channelName,
                   engine: _rtcEngine,
                   isCameraOff: widget.mediaState.isCameraOff,
+                  remoteMutedAudio: widget.remoteMutedAudio,
+                  remoteCameraOff: widget.remoteCameraOff,
                 ),
               ),
               CallControlBar(
@@ -108,26 +155,14 @@ class _VideoCallViewState extends State<VideoCallView> {
             ),
           )
         : hasRemote
-        ? AgoraVideoView(
-            controller: VideoViewController.remote(
-              rtcEngine: _rtcEngine,
-              canvas: VideoCanvas(uid: remoteUid!),
-              connection: RtcConnection(channelId: widget.callState.channelName),
-            ),
-          )
+        ? _remoteView(remoteUid!)
         : const WaitingView();
 
     // Corner (small) view — shown only when swapping is possible or camera is on.
     Widget? cornerChild;
     if (swapped) {
-      // Remote participant in the corner.
-      cornerChild = AgoraVideoView(
-        controller: VideoViewController.remote(
-          rtcEngine: _rtcEngine,
-          canvas: VideoCanvas(uid: remoteUid!),
-          connection: RtcConnection(channelId: widget.callState.channelName),
-        ),
-      );
+      // Remote participant in the corner — show overlays here too.
+      cornerChild = _remoteView(remoteUid!);
     } else if (!widget.mediaState.isCameraOff) {
       // Local camera in the corner.
       cornerChild = LocalVideoPreview(engine: _rtcEngine);

@@ -2,9 +2,16 @@ import 'package:flutter/material.dart';
 
 /// Circular avatar row used in the audio call view.
 class ParticipantAvatars extends StatelessWidget {
-  const ParticipantAvatars({super.key, required this.remoteUids});
+  const ParticipantAvatars({
+    super.key,
+    required this.remoteUids,
+    required this.mutedUids,
+  });
 
   final List<int> remoteUids;
+
+  /// UIDs of remote participants who have muted their microphone.
+  final Set<int> mutedUids;
 
   @override
   Widget build(BuildContext context) {
@@ -21,17 +28,34 @@ class ParticipantAvatars extends StatelessWidget {
       alignment: WrapAlignment.center,
       children: remoteUids
           .map(
-            (uid) => CircleAvatar(
-              radius: 48,
-              backgroundColor: Colors.teal.shade700,
-              child: Text(
-                'U${uid % 100}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+            (uid) => Stack(
+              children: [
+                CircleAvatar(
+                  radius: 48,
+                  backgroundColor: Colors.teal.shade700,
+                  child: Text(
+                    'U${uid % 100}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
                 ),
-              ),
+                if (mutedUids.contains(uid))
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.mic_off, color: Colors.white, size: 12),
+                    ),
+                  ),
+              ],
             ),
           )
           .toList(),

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:control/control.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_project/src/feature/call/data/call_repository.dart';
 import 'package:flutter_project/src/feature/call/models/call_event.dart';
 
 @immutable
@@ -11,9 +10,13 @@ sealed class CallMembersState {
   /// No active call — no participant data available.
   const factory CallMembersState.idle() = CallMembers$IdleState;
 
-  /// Active call — local uid and list of remote uids.
-  const factory CallMembersState.active({required int localUid, required List<int> remoteUids}) =
-      CallMembers$ActiveState;
+  /// Active call — local uid, list of remote uids, and remote media state.
+  const factory CallMembersState.active({
+    required int localUid,
+    required List<int> remoteUids,
+    required Map<int, bool> remoteMutedAudio,
+    required Map<int, bool> remoteCameraOff,
+  }) = CallMembers$ActiveState;
 }
 
 /// No active call — no participant data available.
@@ -21,36 +24,61 @@ final class CallMembers$IdleState extends CallMembersState {
   const CallMembers$IdleState();
 }
 
-/// Active call — local uid and list of remote uids.
+/// Active call — local uid, list of remote uids, and per-user media state.
 final class CallMembers$ActiveState extends CallMembersState {
-  const CallMembers$ActiveState({required this.localUid, required this.remoteUids});
+  const CallMembers$ActiveState({
+    required this.localUid,
+    required this.remoteUids,
+    required this.remoteMutedAudio,
+    required this.remoteCameraOff,
+  });
 
   final int localUid;
   final List<int> remoteUids;
 
-  CallMembers$ActiveState copyWith({int? localUid, List<int>? remoteUids}) =>
-      CallMembers$ActiveState(
-        localUid: localUid ?? this.localUid,
-        remoteUids: remoteUids ?? this.remoteUids,
-      );
+  /// uid → true when the remote user has muted their microphone.
+  final Map<int, bool> remoteMutedAudio;
+
+  /// uid → true when the remote user has turned their camera off.
+  final Map<int, bool> remoteCameraOff;
+
+  CallMembers$ActiveState copyWith({
+    int? localUid,
+    List<int>? remoteUids,
+    Map<int, bool>? remoteMutedAudio,
+    Map<int, bool>? remoteCameraOff,
+  }) => CallMembers$ActiveState(
+    localUid: localUid ?? this.localUid,
+    remoteUids: remoteUids ?? this.remoteUids,
+    remoteMutedAudio: remoteMutedAudio ?? this.remoteMutedAudio,
+    remoteCameraOff: remoteCameraOff ?? this.remoteCameraOff,
+  );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is CallMembers$ActiveState &&
           localUid == other.localUid &&
-          remoteUids == other.remoteUids);
+          remoteUids == other.remoteUids &&
+          remoteMutedAudio == other.remoteMutedAudio &&
+          remoteCameraOff == other.remoteCameraOff);
 
   @override
-  int get hashCode => localUid.hashCode ^ remoteUids.hashCode;
+  int get hashCode =>
+      localUid.hashCode ^
+      remoteUids.hashCode ^
+      remoteMutedAudio.hashCode ^
+      remoteCameraOff.hashCode;
 
   @override
-  String toString() => 'CallMembersState.active(localUid: $localUid, remoteUids: $remoteUids)';
+  String toString() =>
+      'CallMembersState.active(localUid: $localUid, remoteUids: $remoteUids, '
+      'remoteMutedAudio: $remoteMutedAudio, remoteCameraOff: $remoteCameraOff)';
 }
 
-/// Tracks who is in the call: the local user and all remote participants.
+/// Tracks who is in the call and their media state (mute/camera).
 /// Subscribes directly to repository events — has no knowledge of call
-/// lifecycle (join/leave) or media controls.
+/// lifecycle (join/leave) or local media controls.
 final class CallMembersController extends StateController<CallMembersState>
     with SequentialControllerHandler {
   CallMembersController({required final Stream<CallEvent> eventStream})
@@ -63,14 +91,31 @@ final class CallMembersController extends StateController<CallMembersState>
   void _onEvent(CallEvent event) {
     switch (event) {
       case CallEvent$Joined(:final localUid):
-        setState(CallMembersState.active(localUid: localUid, remoteUids: const []));
+        setState(CallMembersState.active(
+          localUid: localUid,
+          remoteUids: const [],
+          remoteMutedAudio: const {},
+          remoteCameraOff: const {},
+        ));
       case CallEvent$Left():
         _subscription?.cancel();
         setState(const CallMembersState.idle());
       case CallEvent$UserJoined(:final uid):
         _whenActive((s) => s.copyWith(remoteUids: [...s.remoteUids, uid]));
       case CallEvent$UserLeft(:final uid):
-        _whenActive((s) => s.copyWith(remoteUids: s.remoteUids.where((u) => u != uid).toList()));
+        _whenActive((s) => s.copyWith(
+          remoteUids: s.remoteUids.where((u) => u != uid).toList(),
+          remoteMutedAudio: Map.of(s.remoteMutedAudio)..remove(uid),
+          remoteCameraOff: Map.of(s.remoteCameraOff)..remove(uid),
+        ));
+      case CallEvent$UserMutedAudio(:final uid, :final muted):
+        _whenActive((s) => s.copyWith(
+          remoteMutedAudio: {...s.remoteMutedAudio, uid: muted},
+        ));
+      case CallEvent$UserMutedVideo(:final uid, :final muted):
+        _whenActive((s) => s.copyWith(
+          remoteCameraOff: {...s.remoteCameraOff, uid: muted},
+        ));
       case CallEvent$Error():
         break; // handled by CallController
     }
