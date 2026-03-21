@@ -16,6 +16,66 @@ Be concise and efficient in every response. Do not repeat information the user a
 
 This document analyzes the clean architecture implementation in this Flutter application, focusing on the example feature as an example. The application follows a well-structured clean architecture pattern with clear separation of concerns.
 
+---
+
+## Project Structure
+
+### Project `lib` Folder Structure
+
+The `lib` folder must follow this top-level structure:
+
+```
+lib/
+├── main.dart
+└── src/
+    ├── common/       # shared utilities, widgets, database, constants, etc.
+    └── feature/      # one sub-folder per feature
+```
+
+**Rules:**
+
+- `lib/main.dart` must always exist as the app entry point.
+- `lib/src/` must always exist. All source code lives inside `src/` — nothing else goes directly under `lib/` except `main.dart`.
+- `lib/src/common/` must always exist for shared code (database, router, constants, models, utilities, common widgets).
+- `lib/src/feature/` must always exist and contains one sub-folder per feature.
+- **If these folders already exist, do not recreate or restructure them.** Only create what is genuinely missing.
+- Never place feature code directly under `lib/src/` — every feature gets its own named folder inside `lib/src/feature/`.
+
+### Feature Structure Analysis: Example
+
+#### Directory Structure
+
+```
+example/
+├── controller/
+│   └── example_controller.dart
+├── data/
+│   └── example_repository.dart
+├── models/
+│   ├── example.dart
+│   ├── example_other_1.dart
+│   ├── example_other_2.dart
+│   ├── example_other_3.dart
+│   └── ...
+└── widgets/
+    ├── controllers/
+    │   └── example_data_controller.dart
+    ├── desktop/example_desktop_widget.dart
+    ├── mobile/example_mobile_widget.dart
+    ├── tablet/example_tablet_widget.dart
+    └── example_config_widget.dart
+```
+
+#### Layer Integration
+
+1. **UI Layer**: `example_config_widget.dart` initializes and manages feature controllers
+2. **Presentation Layer**: `example_data_controller.dart` manages UI state
+3. \*\*Business Logic Layer: `example_controller.dart` handles business logic and state
+4. **Data Layer**: `example_repository.dart` handles data operations
+5. **Model Layer**: `example.dart` represents domain entities
+
+---
+
 ## Clean Architecture Layers
 
 ### 1. Data Layer (`data/`)
@@ -52,6 +112,71 @@ final class ExampleRepositoryImpl implements IExampleRepository {
 - API client abstraction
 - Data transformation using converters
 
+### Stream-Returning Methods in Repositories
+
+Repository methods that return `Stream<T>` must always guarantee the stream is eventually closed. Never return a bare `StreamController.stream` without a close path — it leaks resources.
+
+#### Pattern 1 — `onListen` / `onCancel` (lazy, resource-safe)
+
+Code runs only when someone starts listening. Resources are released when the subscriber cancels.
+
+```dart
+Stream<R> fn() {
+  final controller = StreamController<R>();
+  controller
+    ..onListen = () {
+      // Start emitting values only when the stream is listened to.
+      if (!controller.isClosed) controller.add(/* value of type R */);
+    }
+    ..onCancel = () {
+      // Clean up resources when the stream is cancelled.
+      if (!controller.isClosed) controller.close();
+    };
+  return controller.stream;
+}
+```
+
+Add a mutex or boolean flag to guarantee `close()` is never called while `onListen` is still executing, and to break any loop inside `onListen` when cancellation occurs.
+
+#### Pattern 2 — `async Future` wrapper (simpler, more readable)
+
+The entire emission logic lives in an async closure. The `finally` block guarantees `close()` is always called.
+
+```dart
+Stream<R> fn() {
+  final controller = StreamController<R>();
+  Future<void>(() async {
+    try {
+      // Your emission logic here, e.g. a for(;;) loop.
+      controller.add(r);
+    } on Object catch (e, s) {
+      controller.addError(e, s);
+    } finally {
+      controller.close();
+    }
+  }).ignore();
+  return controller.stream;
+}
+```
+
+The async body can also be placed entirely inside `onListen` instead of a standalone `Future`.
+
+#### One-shot helpers
+
+For simple cases prefer the built-in constructors over a manual controller:
+
+```dart
+Stream.value(r)               // single value then done
+Stream.fromFuture(future)     // single async value then done
+Stream.fromFutures([f1, f2])  // multiple async values then done
+```
+
+#### Rule
+
+Every `Stream`-returning repository method must use one of the patterns above. A `StreamController` with no guaranteed `close()` path is always wrong.
+
+---
+
 ### 2. Model Layer (`models/`)
 
 Models represent business entities and are immutable.
@@ -87,6 +212,40 @@ class Example {
 
 - Immutable design with `@immutable` annotation
 - `copyWith` method for functional updates
+
+### Model CopyWith Pattern
+
+For models that use the `copyWith` method, they must use the `ValueGetter` function from the foundation package for optional parameters. This ensures proper null-safety and functional updates:
+
+```dart
+Example copyWith({
+  int? id,
+  ValueGetter<double?>? parameter_1,
+  ValueGetter<double?>? parameter_2,
+  ValueGetter<double?>? invoicesQty,
+  ValueGetter<double?>? returnsTotal,
+  ValueGetter<double?>? returnsQty,
+  ValueGetter<double?>? paymentsTotal,
+  ValueGetter<double?>? paymentsQty,
+  ValueGetter<double?>? grandTotal,
+  // ... other parameters
+}) {
+  return Example(
+    id: id ?? this.id,
+    parameter_1: parameter_1 != null ? parameter_1() : this.parameter_1,
+    parameter_2: parameter_2 != null ? parameter_2() : this.parameter_2,
+    invoicesQty: invoicesQty != null ? invoicesQty() : this.invoicesQty,
+    returnsTotal: returnsTotal != null ? returnsTotal() : this.returnsTotal,
+    returnsQty: returnsQty != null ? returnsQty() : this.returnsQty,
+    paymentsTotal: paymentsTotal != null ? paymentsTotal() : this.paymentsTotal,
+    paymentsQty: paymentsQty != null ? paymentsQty() : this.paymentsQty,
+    grandTotal: grandTotal != null ? grandTotal() : this.grandTotal,
+    // ... assign other parameters
+  );
+}
+```
+
+---
 
 ### 3. Controller Layer (`controller/`)
 
@@ -134,6 +293,157 @@ final class ExampleController extends StateController<ExampleState>
 - Dependency injection through constructor
 - Sequential handling to prevent race conditions
 - State management with loading/error/completed states
+
+### Single Responsibility Principle for Features and Controllers
+
+Every feature folder and every controller must have **one clearly defined domain responsibility**. A responsibility is not a single function — it is a single domain concern.
+
+#### What "one responsibility" means
+
+A controller may have multiple methods as long as they all serve the same domain concern:
+
+```dart
+// ✅ Correct — AuthenticationController has one responsibility: managing auth state.
+// signIn, signOut, checkToken all answer the same question: "is this user authenticated?"
+class AuthenticationController {
+  void signIn({required String username, required String password}) => ...
+  void signOut() => ...
+  void checkToken() => ...
+}
+```
+
+This is fine. All three methods are facets of the same concern. Splitting them into three separate features would be over-engineering.
+
+#### When to split into separate features
+
+Split when two things have **genuinely independent UI state machines** or **no logical connection at the domain level**.
+
+The quick replies functionality is split into three features because each has a distinct concern:
+
+```
+example_list/          → "Provide the reactive list of quick replies to the UI"
+example_creation/   → "Manage the create/edit form lifecycle (inProgress, completed, error)"
+example_deletion/   → "Manage the delete confirmation lifecycle (inProgress, completed, error)"
+```
+
+The creation form and the deletion dialog each need their own `inProgress` / `completed` / `error` state independently. If they shared one controller, a deletion in progress could overwrite the creation form's state — causing wrong UI feedback and broken `PopScope` behaviour. The list (watching a stream) has no state overlap with either mutation. These are separate concerns, so they are separate features.
+
+#### The pattern for mutation features (creation, deletion)
+
+Each mutation feature follows this exact structure:
+
+```
+feature_name/
+├── data/feature_name_repository.dart      (interface + impl)
+├── controller/feature_name_controller.dart (freezed states + handle())
+└── widgets/
+    ├── feature_name_config_widget.dart    (InheritedWidget scope + static factory)
+    └── feature_name_dialog_widget.dart    (form/confirmation UI)
+```
+
+**Controller** uses `DroppableControllerHandler` for mutations so duplicate taps are dropped:
+
+```dart
+class ExampleCreationController extends StateController<ExampleCreationState>
+    with DroppableControllerHandler {
+
+  void save({required String title, required String content, int? workerId, Example? existing}) =>
+      handle(() async {
+        setState(const ExampleCreationState.inProgress());
+        final result = await _repo.save(title: title, content: content, existing: existing);
+        setState(ExampleCreationState.completed(result));
+      }, error: (e, st) async => setState(const ExampleCreationState.error()));
+}
+```
+
+Use `SequentialControllerHandler` for load/watch operations.
+
+**Config widget** owns the controller lifecycle and exposes a static factory so callers need only one line:
+
+```dart
+class ExampleCreationConfigWidget extends StatefulWidget {
+  static Future<void> showCreationDialog(BuildContext context, {Example? existing}) {
+    return showDialog<void>(
+      context: context,
+      builder: (ctx) => ExampleCreationConfigWidget(
+        builder: (_) => ExampleCreationDialogWidget(existing: existing),
+      ),
+    );
+  }
+  // ...
+}
+```
+
+**Dialog widget** uses `StateConsumer` to close itself on completion and `PopScope` to block dismissal mid-flight:
+
+```dart
+StateConsumer<ExampleCreationController, ExampleCreationState>(
+  controller: _controller,
+  listener: (context, controller, oldState, newState) {
+    if (newState is ExampleCreation$CompletedState) Navigator.pop(context);
+  },
+  builder: (context, state, child) => PopScope(
+    canPop: state is! ExampleCreation$InProgressState,
+    child: AlertDialog(...),
+  ),
+);
+```
+
+**Calling site** only uses the static factory — no knowledge of internals:
+
+```dart
+ExampleCreationConfigWidget.showCreationDialog(context);
+ExampleCreationConfigWidget.showCreationDialog(context, existing: example);
+ExampleDeletionConfigWidget.showDeletionDialog(context, example);
+```
+
+#### Rules to always follow
+
+- **Group by domain concern, not by function count.** A controller with three related methods is fine. A controller with two unrelated concerns must be split.
+- **Create and update may share one feature** when they are conceptually the same action (both write the same record). The create-vs-update decision belongs in the repository, not the controller or widget.
+- **Split when UI states are independent.** If two operations each need their own `inProgress` / `completed` / `error` displayed simultaneously or to different widgets, they need separate controllers and separate features.
+- **Config widgets own controller lifecycle** — created in `initState`, disposed in `dispose`, never elsewhere.
+- **Static factory methods on config widgets** keep all wiring internal and give callers a one-line API.
+- **`DroppableControllerHandler`** for mutations. **`SequentialControllerHandler`** for load/watch.
+- **`PopScope(canPop: state is! ...InProgressState)`** on every dialog with an async operation.
+
+### Multiple Controllers per Feature
+
+When a feature contains async operations with **different concurrency requirements**, split them into separate controllers — one per async concern. This is correct architecture, not over-engineering.
+
+#### When to split controllers within one feature
+
+Split when two groups of async operations:
+
+- Need different concurrency handlers (`DroppableControllerHandler` vs `SequentialControllerHandler`), or
+- Maintain genuinely independent state that must update simultaneously without one overwriting the other.
+
+#### Example — call feature
+
+```
+call/controller/
+├── call_controller.dart
+├── call_media_controller.dart
+└── call_members_controller.dart
+```
+
+Each controller handles one async concern. `CallMediaController` uses `Droppable` so rapid taps are dropped. `CallController` uses `Sequential` so join and leave are never interleaved. Sharing one controller would force a single concurrency strategy on all three — wrong for at least two of them.
+
+#### Coordination rule
+
+Controllers within the same feature must **never import or depend on each other**. Coordinate them in the **widget layer** via `addListener` or `StateConsumer`'s `listener` parameter. The widget reacts to one controller's state and calls methods on another.
+
+```dart
+// ✅ Widget layer coordinates — controllers stay decoupled
+callController.addListener(() {
+  if (callController.state is Call$IdleState) {
+    callMembersController.reset();
+    callMediaController.reset();
+  }
+});
+```
+
+---
 
 ### 4. Widgets Layer (`widgets/`)
 
@@ -252,6 +562,73 @@ class ExampleDataController with ChangeNotifier {
 - Includes proper lifecycle management with disposal considerations
 - Do not use other state solutions like these packages: Provider, Riverpod, Mobx, Getx, BloC for UI state management for widgets folder
 
+### Accessing Dependencies Through Inherited Widgets
+
+To access dependencies that were initialized inside the `ExampleConfigWidget`, use the `ExampleConfigInhWidget.of(context)` pattern. For example, if you have an `ExampleMobileWidget` that needs to access the `ExampleDataController` initialized in the `ExampleConfigWidget`:
+
+```dart
+class ExampleMobileWidget extends StatefulWidget {
+  const ExampleMobileWidget({super.key});
+
+  @override
+  State<ExampleMobileWidget> createState() =>
+      _ExampleMobileWidgetState();
+}
+
+class _ExampleMobileWidgetState
+    extends State<ExampleMobileWidget> {
+  late final _exampleInhWidget = ExampleConfigInhWidget.of(
+    context,
+  );
+
+  late final _exampleDataController =
+      _exampleInhWidget.exampleDataController;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: _exampleDataController,
+      builder: (context, child) {
+        // Build UI based on the controller's state
+        return Container(
+          // Your widget implementation
+        );
+      },
+    );
+  }
+}
+```
+
+### Modern Dart Constructor Syntax
+
+Use the modern Dart syntax for calling the parent constructor in the super parameter. Instead of the old approach of extending child constructors with explicit `super()` calls, you can now use the `super()` named parameter directly:
+
+```dart
+// Modern approach
+const ExampleMobileWidget({super.key});
+
+// Rather than the older approach which required more verbose syntax
+```
+
+### Using ListenableBuilder for ChangeNotifier
+
+When listening to an `ExampleDataController` (which extends `ChangeNotifier`), use `ListenableBuilder` instead of `ValueListenableBuilder`. `ListenableBuilder` is designed for objects that extend `Listenable` (like `ChangeNotifier`), while `ValueListenableBuilder` is specifically for `ValueNotifier`:
+
+```dart
+// Correct approach for ChangeNotifier
+ListenableBuilder(
+  listenable: exampleDataController,
+  builder: (context, child) {
+    // Return your widget here
+    return YourWidget();
+  },
+)
+
+// Rather than ValueListenableBuilder which is for ValueNotifier
+```
+
+---
+
 ## Dependency Injection Patterns
 
 ### Global Dependency Injection
@@ -305,42 +682,9 @@ void _authenticationListener() {
 }
 ```
 
-## Interface Usage and DI Concepts
+### Scope Management with Inherited Widgets
 
-### Interface-Based Design
-
-The application extensively uses interfaces for loose coupling:
-
-```dart
-// Repository interfaces
-abstract interface class IExampleRepository {...}
-abstract interface class IProductsRepository {...}
-abstract interface class IExampleBalanceRepository {...}
-
-// Controller interfaces (when applicable)
-```
-
-### Constructor-Based Dependency Injection
-
-Dependencies are injected through constructors:
-
-```dart
-// Repository implementation receives API client
-ExampleRepositoryImpl({required final ApiClient apiClient}) : _apiClient = apiClient;
-
-// Controller receives repository interface
-ExampleController({
-  required final IExampleRepository exampleRepository,
-  // ...
-})
-
-// Widget receives dependencies through scope
-dependencies = DependenciesScope.of(context);
-```
-
-## Scope Management with Inherited Widgets
-
-### InheritedWidget Pattern
+#### InheritedWidget Pattern
 
 The application uses InheritedWidget for efficient state propagation:
 
@@ -366,7 +710,7 @@ class ExampleConfigInhWidget extends InheritedWidget {
 }
 ```
 
-### Global Scope with DependenciesScope
+#### Global Scope with DependenciesScope
 
 Global dependencies are provided through the DependenciesScope:
 
@@ -378,59 +722,40 @@ dependencies.inject(child: MaterialApp(...))
 final deps = DependenciesScope.of(context);
 ```
 
-## Project `lib` Folder Structure
+### Interface Usage and DI Concepts
 
-The `lib` folder must follow this top-level structure:
+#### Interface-Based Design
 
-```
-lib/
-├── main.dart
-└── src/
-    ├── common/       # shared utilities, widgets, database, constants, etc.
-    └── feature/      # one sub-folder per feature
-```
+The application extensively uses interfaces for loose coupling:
 
-**Rules:**
+```dart
+// Repository interfaces
+abstract interface class IExampleRepository {...}
+abstract interface class IProductsRepository {...}
+abstract interface class IExampleBalanceRepository {...}
 
-- `lib/main.dart` must always exist as the app entry point.
-- `lib/src/` must always exist. All source code lives inside `src/` — nothing else goes directly under `lib/` except `main.dart`.
-- `lib/src/common/` must always exist for shared code (database, router, constants, models, utilities, common widgets).
-- `lib/src/feature/` must always exist and contains one sub-folder per feature.
-- **If these folders already exist, do not recreate or restructure them.** Only create what is genuinely missing.
-- Never place feature code directly under `lib/src/` — every feature gets its own named folder inside `lib/src/feature/`.
-
-## Feature Structure Analysis: Example
-
-### Directory Structure
-
-```
-example/
-├── controller/
-│   └── example_controller.dart
-├── data/
-│   └── example_repository.dart
-├── models/
-│   ├── example.dart
-│   ├── example_other_1.dart
-│   ├── example_other_2.dart
-│   ├── example_other_3.dart
-│   └── ...
-└── widgets/
-    ├── controllers/
-    │   └── example_data_controller.dart
-    ├── desktop/example_desktop_widget.dart
-    ├── mobile/example_mobile_widget.dart
-    ├── tablet/example_tablet_widget.dart
-    └── example_config_widget.dart
+// Controller interfaces (when applicable)
 ```
 
-### Layer Integration
+#### Constructor-Based Dependency Injection
 
-1. **UI Layer**: `example_config_widget.dart` initializes and manages feature controllers
-2. **Presentation Layer**: `example_data_controller.dart` manages UI state
-3. \*\*Business Logic Layer: `example_controller.dart` handles business logic and state
-4. **Data Layer**: `example_repository.dart` handles data operations
-5. **Model Layer**: `example.dart` represents domain entities
+Dependencies are injected through constructors:
+
+```dart
+// Repository implementation receives API client
+ExampleRepositoryImpl({required final ApiClient apiClient}) : _apiClient = apiClient;
+
+// Controller receives repository interface
+ExampleController({
+  required final IExampleRepository exampleRepository,
+  // ...
+})
+
+// Widget receives dependencies through scope
+dependencies = DependenciesScope.of(context);
+```
+
+---
 
 ## Best Practices Observed
 
@@ -505,7 +830,9 @@ This rule applies everywhere: `StatefulWidget` states, `StatelessWidget` build m
 - Proper disposal of resources
 - Lazy loading where appropriate
 
-## Additional Development Notes
+---
+
+## Development Notes
 
 ### Generated Files
 
@@ -527,317 +854,6 @@ dart run build_runner build && dart format lib/
 ```
 
 This command will generate all necessary files based on annotations in your code, such as Freezed classes, JSON serializers, and other generated code.
-
-### Model CopyWith Pattern
-
-For models that use the `copyWith` method, they must use the `ValueGetter` function from the foundation package for optional parameters. This ensures proper null-safety and functional updates:
-
-```dart
-Example copyWith({
-  int? id,
-  ValueGetter<double?>? parameter_1,
-  ValueGetter<double?>? parameter_2,
-  ValueGetter<double?>? invoicesQty,
-  ValueGetter<double?>? returnsTotal,
-  ValueGetter<double?>? returnsQty,
-  ValueGetter<double?>? paymentsTotal,
-  ValueGetter<double?>? paymentsQty,
-  ValueGetter<double?>? grandTotal,
-  // ... other parameters
-}) {
-  return Example(
-    id: id ?? this.id,
-    parameter_1: parameter_1 != null ? parameter_1() : this.parameter_1,
-    parameter_2: parameter_2 != null ? parameter_2() : this.parameter_2,
-    invoicesQty: invoicesQty != null ? invoicesQty() : this.invoicesQty,
-    returnsTotal: returnsTotal != null ? returnsTotal() : this.returnsTotal,
-    returnsQty: returnsQty != null ? returnsQty() : this.returnsQty,
-    paymentsTotal: paymentsTotal != null ? paymentsTotal() : this.paymentsTotal,
-    paymentsQty: paymentsQty != null ? paymentsQty() : this.paymentsQty,
-    grandTotal: grandTotal != null ? grandTotal() : this.grandTotal,
-    // ... assign other parameters
-  );
-}
-```
-
-### Accessing Dependencies Through Inherited Widgets
-
-To access dependencies that were initialized inside the `ExampleConfigWidget`, use the `ExampleConfigInhWidget.of(context)` pattern. For example, if you have an `ExampleMobileWidget` that needs to access the `ExampleDataController` initialized in the `ExampleConfigWidget`:
-
-```dart
-class ExampleMobileWidget extends StatefulWidget {
-  const ExampleMobileWidget({super.key});
-
-  @override
-  State<ExampleMobileWidget> createState() =>
-      _ExampleMobileWidgetState();
-}
-
-class _ExampleMobileWidgetState
-    extends State<ExampleMobileWidget> {
-  late final _exampleInhWidget = ExampleConfigInhWidget.of(
-    context,
-  );
-
-  late final _exampleDataController =
-      _exampleInhWidget.exampleDataController;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: _exampleDataController,
-      builder: (context, child) {
-        // Build UI based on the controller's state
-        return Container(
-          // Your widget implementation
-        );
-      },
-    );
-  }
-}
-```
-
-### Modern Dart Constructor Syntax
-
-Use the modern Dart syntax for calling the parent constructor in the super parameter. Instead of the old approach of extending child constructors with explicit `super()` calls, you can now use the `super()` named parameter directly:
-
-```dart
-// Modern approach
-const ExampleMobileWidget({super.key});
-
-// Rather than the older approach which required more verbose syntax
-```
-
-### Using ListenableBuilder for ChangeNotifier
-
-When listening to an `ExampleDataController` (which extends `ChangeNotifier`), use `ListenableBuilder` instead of `ValueListenableBuilder`. `ListenableBuilder` is designed for objects that extend `Listenable` (like `ChangeNotifier`), while `ValueListenableBuilder` is specifically for `ValueNotifier`:
-
-```dart
-// Correct approach for ChangeNotifier
-ListenableBuilder(
-  listenable: exampleDataController,
-  builder: (context, child) {
-    // Return your widget here
-    return YourWidget();
-  },
-)
-
-// Rather than ValueListenableBuilder which is for ValueNotifier
-```
-
-## Single Responsibility Principle for Features and Controllers
-
-Every feature folder and every controller must have **one clearly defined domain responsibility**. A responsibility is not a single function — it is a single domain concern.
-
-### What "one responsibility" means
-
-A controller may have multiple methods as long as they all serve the same domain concern:
-
-```dart
-// ✅ Correct — AuthenticationController has one responsibility: managing auth state.
-// signIn, signOut, checkToken all answer the same question: "is this user authenticated?"
-class AuthenticationController {
-  void signIn({required String username, required String password}) => ...
-  void signOut() => ...
-  void checkToken() => ...
-}
-```
-
-This is fine. All three methods are facets of the same concern. Splitting them into three separate features would be over-engineering.
-
-### When to split into separate features
-
-Split when two things have **genuinely independent UI state machines** or **no logical connection at the domain level**.
-
-The quick replies functionality is split into three features because each has a distinct concern:
-
-```
-example_list/          → "Provide the reactive list of quick replies to the UI"
-example_creation/   → "Manage the create/edit form lifecycle (inProgress, completed, error)"
-example_deletion/   → "Manage the delete confirmation lifecycle (inProgress, completed, error)"
-```
-
-The creation form and the deletion dialog each need their own `inProgress` / `completed` / `error` state independently. If they shared one controller, a deletion in progress could overwrite the creation form's state — causing wrong UI feedback and broken `PopScope` behaviour. The list (watching a stream) has no state overlap with either mutation. These are separate concerns, so they are separate features.
-
-### The pattern for mutation features (creation, deletion)
-
-Each mutation feature follows this exact structure:
-
-```
-feature_name/
-├── data/feature_name_repository.dart      (interface + impl)
-├── controller/feature_name_controller.dart (freezed states + handle())
-└── widgets/
-    ├── feature_name_config_widget.dart    (InheritedWidget scope + static factory)
-    └── feature_name_dialog_widget.dart    (form/confirmation UI)
-```
-
-**Controller** uses `DroppableControllerHandler` for mutations so duplicate taps are dropped:
-
-```dart
-class ExampleCreationController extends StateController<ExampleCreationState>
-    with DroppableControllerHandler {
-
-  void save({required String title, required String content, int? workerId, Example? existing}) =>
-      handle(() async {
-        setState(const ExampleCreationState.inProgress());
-        final result = await _repo.save(title: title, content: content, existing: existing);
-        setState(ExampleCreationState.completed(result));
-      }, error: (e, st) async => setState(const ExampleCreationState.error()));
-}
-```
-
-Use `SequentialControllerHandler` for load/watch operations.
-
-**Config widget** owns the controller lifecycle and exposes a static factory so callers need only one line:
-
-```dart
-class ExampleCreationConfigWidget extends StatefulWidget {
-  static Future<void> showCreationDialog(BuildContext context, {Example? existing}) {
-    return showDialog<void>(
-      context: context,
-      builder: (ctx) => ExampleCreationConfigWidget(
-        builder: (_) => ExampleCreationDialogWidget(existing: existing),
-      ),
-    );
-  }
-  // ...
-}
-```
-
-**Dialog widget** uses `StateConsumer` to close itself on completion and `PopScope` to block dismissal mid-flight:
-
-```dart
-StateConsumer<ExampleCreationController, ExampleCreationState>(
-  controller: _controller,
-  listener: (context, controller, oldState, newState) {
-    if (newState is ExampleCreation$CompletedState) Navigator.pop(context);
-  },
-  builder: (context, state, child) => PopScope(
-    canPop: state is! ExampleCreation$InProgressState,
-    child: AlertDialog(...),
-  ),
-);
-```
-
-**Calling site** only uses the static factory — no knowledge of internals:
-
-```dart
-ExampleCreationConfigWidget.showCreationDialog(context);
-ExampleCreationConfigWidget.showCreationDialog(context, existing: example);
-ExampleDeletionConfigWidget.showDeletionDialog(context, example);
-```
-
-### Rules to always follow
-
-- **Group by domain concern, not by function count.** A controller with three related methods is fine. A controller with two unrelated concerns must be split.
-- **Create and update may share one feature** when they are conceptually the same action (both write the same record). The create-vs-update decision belongs in the repository, not the controller or widget.
-- **Split when UI states are independent.** If two operations each need their own `inProgress` / `completed` / `error` displayed simultaneously or to different widgets, they need separate controllers and separate features.
-- **Config widgets own controller lifecycle** — created in `initState`, disposed in `dispose`, never elsewhere.
-- **Static factory methods on config widgets** keep all wiring internal and give callers a one-line API.
-- **`DroppableControllerHandler`** for mutations. **`SequentialControllerHandler`** for load/watch.
-- **`PopScope(canPop: state is! ...InProgressState)`** on every dialog with an async operation.
-
-## Stream-Returning Methods in Repositories
-
-Repository methods that return `Stream<T>` must always guarantee the stream is eventually closed. Never return a bare `StreamController.stream` without a close path — it leaks resources.
-
-### Pattern 1 — `onListen` / `onCancel` (lazy, resource-safe)
-
-Code runs only when someone starts listening. Resources are released when the subscriber cancels.
-
-```dart
-Stream<R> fn() {
-  final controller = StreamController<R>();
-  controller
-    ..onListen = () {
-      // Start emitting values only when the stream is listened to.
-      if (!controller.isClosed) controller.add(/* value of type R */);
-    }
-    ..onCancel = () {
-      // Clean up resources when the stream is cancelled.
-      if (!controller.isClosed) controller.close();
-    };
-  return controller.stream;
-}
-```
-
-Add a mutex or boolean flag to guarantee `close()` is never called while `onListen` is still executing, and to break any loop inside `onListen` when cancellation occurs.
-
-### Pattern 2 — `async Future` wrapper (simpler, more readable)
-
-The entire emission logic lives in an async closure. The `finally` block guarantees `close()` is always called.
-
-```dart
-Stream<R> fn() {
-  final controller = StreamController<R>();
-  Future<void>(() async {
-    try {
-      // Your emission logic here, e.g. a for(;;) loop.
-      controller.add(r);
-    } on Object catch (e, s) {
-      controller.addError(e, s);
-    } finally {
-      controller.close();
-    }
-  }).ignore();
-  return controller.stream;
-}
-```
-
-The async body can also be placed entirely inside `onListen` instead of a standalone `Future`.
-
-### One-shot helpers
-
-For simple cases prefer the built-in constructors over a manual controller:
-
-```dart
-Stream.value(r)               // single value then done
-Stream.fromFuture(future)     // single async value then done
-Stream.fromFutures([f1, f2])  // multiple async values then done
-```
-
-### Rule
-
-Every `Stream`-returning repository method must use one of the patterns above. A `StreamController` with no guaranteed `close()` path is always wrong.
-
----
-
-## Multiple Controllers per Feature
-
-When a feature contains async operations with **different concurrency requirements**, split them into separate controllers — one per async concern. This is correct architecture, not over-engineering.
-
-### When to split controllers within one feature
-
-Split when two groups of async operations:
-
-- Need different concurrency handlers (`DroppableControllerHandler` vs `SequentialControllerHandler`), or
-- Maintain genuinely independent state that must update simultaneously without one overwriting the other.
-
-### Example — call feature
-
-```
-call/controller/
-├── call_controller.dart
-├── call_media_controller.dart
-└── call_members_controller.dart
-```
-
-Each controller handles one async concern. `CallMediaController` uses `Droppable` so rapid taps are dropped. `CallController` uses `Sequential` so join and leave are never interleaved. Sharing one controller would force a single concurrency strategy on all three — wrong for at least two of them.
-
-### Coordination rule
-
-Controllers within the same feature must **never import or depend on each other**. Coordinate them in the **widget layer** via `addListener` or `StateConsumer`'s `listener` parameter. The widget reacts to one controller's state and calls methods on another.
-
-```dart
-// ✅ Widget layer coordinates — controllers stay decoupled
-callController.addListener(() {
-  if (callController.state is Call$IdleState) {
-    callMembersController.reset();
-    callMediaController.reset();
-  }
-});
-```
 
 ---
 
