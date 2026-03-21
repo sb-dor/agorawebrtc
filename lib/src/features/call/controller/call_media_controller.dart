@@ -18,8 +18,7 @@ class CallMediaState {
 
 /// Manages local media controls: mute, camera on/off, and camera flip.
 /// Has no knowledge of call lifecycle or participants.
-final class CallMediaController extends StateController<CallMediaState>
-    with SequentialControllerHandler {
+class CallMediaController extends StateController<CallMediaState> with SequentialControllerHandler {
   CallMediaController({required ICallRepository callRepository})
     : _callRepository = callRepository,
       super(initialState: const CallMediaState());

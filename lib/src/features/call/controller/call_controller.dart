@@ -95,7 +95,7 @@ final class Call$ErrorState extends CallState {
 
 /// Manages the call lifecycle: join, leave, and error recovery.
 /// Media controls and participant tracking are handled by dedicated controllers.
-final class CallController extends StateController<CallState> with SequentialControllerHandler {
+class CallController extends StateController<CallState> with SequentialControllerHandler {
   CallController({
     required ICallRepository callRepository,
     required Stream<CallEvent> eventStream,

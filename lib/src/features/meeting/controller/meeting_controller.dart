@@ -41,8 +41,7 @@ final class Meeting$ErrorState extends MeetingState {
 
 /// Prepares a call by generating a token and building [MeetingParams].
 /// The widget layer listens via [addListener] and navigates when state is [Meeting$ReadyState].
-final class MeetingController extends StateController<MeetingState>
-    with DroppableControllerHandler {
+class MeetingController extends StateController<MeetingState> with DroppableControllerHandler {
   MeetingController({required ITokenRepository tokenRepository})
     : _tokenRepository = tokenRepository,
       super(initialState: const MeetingState.idle());

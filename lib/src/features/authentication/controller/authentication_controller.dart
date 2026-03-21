@@ -77,7 +77,7 @@ final class Authentication$AuthenticatedState extends AuthenticationState {
   String toString() => 'AuthenticationState.authenticated(user: $user)';
 }
 
-final class AuthenticationController extends StateController<AuthenticationState>
+class AuthenticationController extends StateController<AuthenticationState>
     with DroppableControllerHandler {
   AuthenticationController({
     required this.repository,

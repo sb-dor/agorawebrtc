@@ -79,7 +79,7 @@ final class CallMembers$ActiveState extends CallMembersState {
 /// Tracks who is in the call and their media state (mute/camera).
 /// Subscribes directly to repository events — has no knowledge of call
 /// lifecycle (join/leave) or local media controls.
-final class CallMembersController extends StateController<CallMembersState>
+class CallMembersController extends StateController<CallMembersState>
     with SequentialControllerHandler {
   CallMembersController({required final Stream<CallEvent> eventStream})
     : super(initialState: const CallMembersState.idle()) {
