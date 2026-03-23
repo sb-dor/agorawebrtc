@@ -18,7 +18,7 @@ class CallActiveWidget extends StatefulWidget {
 }
 
 class _CallActiveWidgetState extends State<CallActiveWidget> {
-  late final _scope = CallConfigInhWidget.of(context);
+  late final _scope = CallScope.of(context);
   late final _callController = _scope.callController;
   late final _mediaController = _scope.callMediaController;
   late final _membersController = _scope.callMembersController;

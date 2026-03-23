@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:agorawebrtc/src/common/constant/config.dart';
 import 'package:agorawebrtc/src/features/call/controller/call_controller.dart';
@@ -16,20 +15,23 @@ import 'package:flutter/material.dart';
 import 'package:l/l.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-/// Inherited widget that exposes [CallScreenState] to the active-call subtree.
-class CallConfigInhWidget extends InheritedWidget {
-  const CallConfigInhWidget({super.key, required this.state, required super.child});
+/// {@template call_screen}
+/// CallScope widget.
+/// {@endtemplate}
+class CallScope extends InheritedWidget {
+  /// {@macro call_screen}
+  const CallScope({super.key, required this.state, required super.child});
 
   static CallScreenState of(BuildContext context) {
-    final widget = context.getElementForInheritedWidgetOfExactType<CallConfigInhWidget>()?.widget;
+    final widget = context.getElementForInheritedWidgetOfExactType<CallScope>()?.widget;
     assert(widget != null, 'CallConfigInhWidget was not found in element tree');
-    return (widget as CallConfigInhWidget).state;
+    return (widget as CallScope).state;
   }
 
   final CallScreenState state;
 
   @override
-  bool updateShouldNotify(CallConfigInhWidget old) => false;
+  bool updateShouldNotify(covariant CallScope oldWidget) => false;
 }
 
 /// Receives [MeetingParams], initializes the Agora engine, and manages the
@@ -160,7 +162,7 @@ class CallScreenState extends State<CallScreen> {
       return const Scaffold(body: _ConnectingWidget());
     }
 
-    return CallConfigInhWidget(
+    return CallScope(
       state: this,
       child: StateConsumer<CallController, CallState>(
         controller: callController,

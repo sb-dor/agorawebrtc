@@ -52,7 +52,7 @@ class _VideoCallViewState extends State<VideoCallView> {
   @override
   void initState() {
     super.initState();
-    _rtcEngine = CallConfigInhWidget.of(context).rtcEngine;
+    _rtcEngine = CallScope.of(context).rtcEngine;
   }
 
   @override
