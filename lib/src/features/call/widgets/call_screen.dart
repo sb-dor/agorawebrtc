@@ -69,11 +69,10 @@ class CallScreenState extends State<CallScreen> {
   @override
   void dispose() {
     if (_initialized) {
-      callController
-        ..removeListener(_onCallStateChanged)
-        ..dispose();
+      callController.removeListener(_onCallStateChanged);
       callMediaController.dispose();
       callMembersController.dispose();
+      callController.dispose();
       rtcEngine
         ..unregisterEventHandler(const RtcEngineEventHandler())
         ..release();
