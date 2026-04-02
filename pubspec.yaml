@@ -85,7 +85,7 @@ dependencies:
   #dio_smart_retry: ^6.0.0
 
   # UI and Widgets
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^1.0.9
   #google_fonts: ^6.2.1
   #font_awesome_flutter: ^10.7.0
 
